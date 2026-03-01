@@ -70,4 +70,15 @@ export class ProductList implements OnInit {
       error: (err) => console.error('Failed to add to wishlist', err)
     });
   }
+
+  addToCompare(product: Product, event: Event) {
+    event.stopPropagation();
+    this.orderService.addToCompare(product.id).subscribe({
+      next: () => alert(`${product.name} added to compare!`),
+      error: (err) => {
+        const msg = err?.error?.message || 'Maximum 4 products can be compared';
+        alert(msg);
+      }
+    });
+  }
 }

@@ -33,10 +33,53 @@
             </div>
         </div>
 
+        <!-- Image Section: URL or Upload -->
         <div class="form-group">
-            <label for="imageUrl">Image URL (Optional)</label>
-            <input id="imageUrl" type="text" formControlName="imageUrl" class="form-control"
-                placeholder="https://example.com/image.png" />
+            <label>Product Image</label>
+            <div class="image-mode-tabs">
+                <button type="button" class="tab-btn" [class.active]="imageMode === 'url'"
+                    (click)="imageMode = 'url'">Paste URL</button>
+                <button type="button" class="tab-btn" [class.active]="imageMode === 'upload'"
+                    (click)="imageMode = 'upload'">Upload from Device</button>
+            </div>
+
+            <!-- URL Mode -->
+            <div *ngIf="imageMode === 'url'">
+                <input id="imageUrl" type="text" formControlName="imageUrl" class="form-control"
+                    placeholder="https://example.com/image.png" />
+            </div>
+
+            <!-- Upload Mode -->
+            <div *ngIf="imageMode === 'upload'" class="upload-zone" [class.drag-over]="isDragOver"
+                (dragover)="onDragOver($event)" (dragleave)="isDragOver = false" (drop)="onDrop($event)"
+                (click)="fileInput.click()">
+
+                <div *ngIf="!imagePreview && !isUploading" class="upload-placeholder">
+                    <div class="upload-icon">📁</div>
+                    <p class="upload-title">Drag & drop image here or click to browse</p>
+                    <p class="upload-specs">JPEG, PNG or WebP • Max 5MB • Best: 800×800 to 1200×1200px</p>
+                </div>
+
+                <div *ngIf="isUploading" class="upload-placeholder">
+                    <div class="upload-icon spinner">⏳</div>
+                    <p class="upload-title">Uploading...</p>
+                </div>
+
+                <div *ngIf="imagePreview && !isUploading" class="preview-container">
+                    <img [src]="imagePreview" alt="Product preview" class="preview-img" />
+                    <div class="preview-info">
+                        <span class="dim-badge" *ngIf="imageDimensions">{{ imageDimensions.width }}×{{
+                            imageDimensions.height }}px</span>
+                        <button type="button" class="btn-remove" (click)="removeImage($event)">✕ Remove</button>
+                    </div>
+                </div>
+
+                <input type="file" #fileInput accept="image/jpeg,image/png,image/webp" (change)="onFileSelected($event)"
+                    style="display: none;" />
+            </div>
+
+            <p *ngIf="imageWarning" class="image-warning">⚠️ {{ imageWarning }}</p>
+            <p *ngIf="uploadError" class="image-error">❌ {{ uploadError }}</p>
         </div>
 
         <div class="form-group">

@@ -1,9 +1,12 @@
 com\shoppe\auth\config\DatabaseSeeder.class
+com\shoppe\auth\dto\ResetPasswordRequest.class
+com\shoppe\auth\dto\ForgotPasswordRequest.class
 com\shoppe\auth\dto\JwtResponse.class
 com\shoppe\auth\controller\AuthController.class
 com\shoppe\auth\model\RoleName.class
 com\shoppe\auth\dto\SignupRequest.class
 com\shoppe\auth\repository\RoleRepository.class
+com\shoppe\auth\repository\PasswordResetTokenRepository.class
 com\shoppe\auth\security\JwtUtils.class
 com\shoppe\auth\security\SecurityConfig.class
 com\shoppe\auth\dto\LoginRequest.class
@@ -13,4 +16,5 @@ com\shoppe\auth\security\JwtAuthenticationFilter.class
 com\shoppe\auth\security\CustomUserDetailsService.class
 com\shoppe\auth\repository\UserRepository.class
 com\shoppe\auth\model\User.class
+com\shoppe\auth\model\PasswordResetToken.class
 com\shoppe\auth\AuthServiceApplication.class

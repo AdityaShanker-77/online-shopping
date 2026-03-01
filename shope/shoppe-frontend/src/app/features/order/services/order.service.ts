@@ -41,6 +41,19 @@ export class OrderService {
         return this.http.delete(`${this.apiUrl}/wishlist/${productId}`);
     }
 
+    // Compare
+    getCompareItems(): Observable<any[]> {
+        return this.http.get<any[]>(`${this.apiUrl}/compare`);
+    }
+
+    addToCompare(productId: number): Observable<any> {
+        return this.http.post(`${this.apiUrl}/compare/${productId}`, {});
+    }
+
+    removeFromCompare(productId: number): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/compare/${productId}`);
+    }
+
     // Checkout
     checkout(shippingAddress: string): Observable<Order> {
         return this.http.post<Order>(`${this.apiUrl}/orders/checkout`, { shippingAddress });

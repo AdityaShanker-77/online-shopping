@@ -25,29 +25,46 @@ export class AdminDashboard implements OnInit {
     }
 
     loadData() {
-        this.loadUsers();
-        this.loadRetailers();
-    }
-
-    loadUsers() {
         this.loadingUsers = true;
+        this.loadingRetailers = true;
+        // Load users first, then load retailers so we can cross-reference them
         this.adminService.getUsers().subscribe({
             next: (data) => {
                 this.users = data;
                 this.loadingUsers = false;
+                this.loadRetailers();
             },
             error: (err) => {
                 console.error('Failed to load users', err);
                 this.loadingUsers = false;
+                this.loadRetailers();
             }
         });
     }
 
     loadRetailers() {
-        this.loadingRetailers = true;
         this.adminService.getRetailers().subscribe({
             next: (data) => {
                 this.retailers = data;
+
+                // Cross-reference: find users with ROLE_RETAILER who haven't created a store yet
+                const mappedRetailerUserIds = this.retailers.map(r => r.userId);
+                const pendingSetupUsers = this.users.filter(u => u.roles.includes('ROLE_RETAILER') && !mappedRetailerUserIds.includes(u.id));
+
+                // Push them into the array for visual display as "Awaiting Setup"
+                pendingSetupUsers.forEach(u => {
+                    this.retailers.push({
+                        id: 0, // 0 = dummy id since it has no DB record
+                        userId: u.id,
+                        storeName: 'Pending Store Setup',
+                        ownerName: u.name,
+                        email: u.email,
+                        revenue: 0,
+                        approved: false,
+                        description: ''
+                    } as RetailerProfile);
+                });
+
                 this.loadingRetailers = false;
             },
             error: (err) => {

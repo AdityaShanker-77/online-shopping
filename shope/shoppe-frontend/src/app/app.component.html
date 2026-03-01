@@ -3,6 +3,8 @@
         <a routerLink="/">Shopp-E</a>
     </div>
     <div class="nav-links">
+        <a routerLink="/products" class="nav-link" routerLinkActive="active">Products</a>
+
         <div class="nav-links" *ngIf="!currentUser">
             <button class="btn-3d btn-login" routerLink="/auth/login">Login</button>
             <button class="btn-3d btn-primary" routerLink="/auth/register">Sign Up</button>
@@ -10,7 +12,7 @@
 
         <div class="nav-links" *ngIf="currentUser">
             <ng-container *ngIf="isCustomer">
-                <a routerLink="/products" class="nav-link" routerLinkActive="active">Products</a>
+                <a routerLink="/order/compare" class="nav-link" routerLinkActive="active">Compare</a>
                 <a routerLink="/order/wishlist" class="nav-link" routerLinkActive="active">Wishlist</a>
                 <a routerLink="/order/cart" class="nav-link" routerLinkActive="active">Cart</a>
             </ng-container>

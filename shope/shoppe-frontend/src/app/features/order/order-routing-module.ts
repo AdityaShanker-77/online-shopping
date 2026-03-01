@@ -4,11 +4,13 @@ import { Cart } from './cart/cart';
 import { Checkout } from './checkout/checkout';
 
 import { WishlistComponent } from './wishlist/wishlist';
+import { CompareComponent } from './compare/compare';
 
 const routes: Routes = [
   { path: 'cart', component: Cart },
   { path: 'checkout', component: Checkout },
   { path: 'wishlist', component: WishlistComponent },
+  { path: 'compare', component: CompareComponent },
   { path: '', redirectTo: 'cart', pathMatch: 'full' }
 ];
 

@@ -1,0 +1,48 @@
+<div class="compare-container">
+    <h2>Compare Products</h2>
+    <p class="subtitle">Compare up to 4 products side-by-side</p>
+
+    <div *ngIf="loading" class="loading">Loading comparison...</div>
+
+    <div *ngIf="!loading && compareItems.length === 0" class="empty-state">
+        <p>No products to compare.</p>
+        <p class="hint">Go to <a routerLink="/products">Products</a> and click "Compare" on items you'd like to compare.
+        </p>
+    </div>
+
+    <div *ngIf="!loading && compareItems.length > 0" class="compare-table-wrapper">
+        <table class="compare-table">
+            <thead>
+                <tr>
+                    <th class="label-col">Feature</th>
+                    <th *ngFor="let item of compareItems" class="product-col">
+                        <div class="product-thumb">
+                            <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="item.name" />
+                            <div *ngIf="!item.imageUrl" class="no-image">No Image</div>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="label-cell">Name</td>
+                    <td *ngFor="let item of compareItems" class="value-cell name-cell">{{ item.name }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Price</td>
+                    <td *ngFor="let item of compareItems" class="value-cell price-cell">${{ item.price }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Category</td>
+                    <td *ngFor="let item of compareItems" class="value-cell">{{ item.categoryName || 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Actions</td>
+                    <td *ngFor="let item of compareItems" class="value-cell">
+                        <button class="btn-remove" (click)="removeItem(item.id)">Remove</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

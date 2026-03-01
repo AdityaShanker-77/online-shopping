@@ -12,4 +12,5 @@ public class UserProfileDto {
     @Size(max = 20)
     private String phone;
     private String address;
+    private String profilePictureUrl;
 }

@@ -28,14 +28,18 @@
                             <td>{{ retailer.ownerName }}</td>
                             <td>
                                 <span class="status-badge" [class.approved]="retailer.approved">
-                                    {{ retailer.approved ? 'Approved' : 'Pending' }}
+                                    {{ retailer.id === 0 ? 'Awaiting Setup' : (retailer.approved ? 'Approved' :
+                                    'Pending') }}
                                 </span>
                             </td>
                             <td>
-                                <button *ngIf="!retailer.approved" class="btn btn-sm btn-success"
+                                <button *ngIf="retailer.id !== 0 && !retailer.approved" class="btn btn-sm btn-success"
                                     (click)="approveRetailer(retailer.id)">Approve</button>
-                                <button class="btn btn-sm btn-danger ml-2"
+                                <button *ngIf="retailer.id !== 0" class="btn btn-sm btn-danger ml-2"
                                     (click)="deleteRetailer(retailer.id)">Delete</button>
+                                <span *ngIf="retailer.id === 0"
+                                    style="color: #888; font-size: 0.85rem; font-style: italic;">Must setup store
+                                    first</span>
                             </td>
                         </tr>
                     </tbody>

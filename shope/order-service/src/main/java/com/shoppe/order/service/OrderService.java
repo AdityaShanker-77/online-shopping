@@ -19,6 +19,7 @@ public class OrderService {
 
     private final CartItemRepository cartItemRepository;
     private final WishlistRepository wishlistRepository;
+    private final CompareItemRepository compareItemRepository;
     private final OrderRepository orderRepository;
     private final ProductServiceClient productServiceClient;
 
@@ -98,12 +99,51 @@ public class OrderService {
         wishlistRepository.findByUserIdAndProductId(userId, productId).ifPresent(wishlistRepository::delete);
     }
 
+    // ─── Compare ─────────────────────────────────────────
+
+    public List<ProductDto> getCompareItems(Long userId) {
+        return compareItemRepository.findByUserId(userId).stream().map(c -> {
+            ProductDto dto = new ProductDto();
+            dto.setId(c.getProductId());
+            dto.setName(c.getProductName());
+            dto.setImageUrl(c.getImageUrl());
+            dto.setPrice(c.getPrice() != null ? BigDecimal.valueOf(c.getPrice()) : BigDecimal.ZERO);
+            dto.setCategoryName(c.getCategory());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void addToCompare(Long userId, Long productId) {
+        if (compareItemRepository.findByUserIdAndProductId(userId, productId).isPresent()) {
+            return; // already in compare list
+        }
+        if (compareItemRepository.countByUserId(userId) >= 4) {
+            throw new RuntimeException("Maximum 4 products can be compared at once");
+        }
+        ProductDto product = productServiceClient.getProductById(productId);
+        CompareItem c = new CompareItem();
+        c.setUserId(userId);
+        c.setProductId(productId);
+        c.setProductName(product.getName());
+        c.setImageUrl(product.getImageUrl());
+        c.setPrice(product.getPrice() != null ? product.getPrice().doubleValue() : 0);
+        c.setCategory(product.getCategoryName());
+        compareItemRepository.save(c);
+    }
+
+    @Transactional
+    public void removeFromCompare(Long userId, Long productId) {
+        compareItemRepository.findByUserIdAndProductId(userId, productId).ifPresent(compareItemRepository::delete);
+    }
+
     // ─── Checkout ─────────────────────────────────────────
 
     @Transactional
     public OrderDto checkout(Long userId, String shippingAddress) {
         List<CartItem> cartItems = cartItemRepository.findByUserId(userId);
-        if (cartItems.isEmpty()) throw new RuntimeException("Cart is empty");
+        if (cartItems.isEmpty())
+            throw new RuntimeException("Cart is empty");
 
         Order order = new Order();
         order.setUserId(userId);

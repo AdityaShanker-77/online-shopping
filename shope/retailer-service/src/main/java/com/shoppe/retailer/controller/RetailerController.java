@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -79,6 +80,17 @@ public class RetailerController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         retailerRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/sales")
+    public ResponseEntity<?> getSalesData(@PathVariable Long id) {
+        Retailer r = retailerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Retailer not found"));
+        Map<String, Object> sales = new java.util.HashMap<>();
+        sales.put("retailerId", r.getId());
+        sales.put("storeName", r.getStoreName());
+        sales.put("totalRevenue", r.getRevenue());
+        return ResponseEntity.ok(sales);
     }
 
     private RetailerDto toDto(Retailer r) {

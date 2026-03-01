@@ -82,6 +82,32 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 
+    // ── Compare ─────────────────────────────
+
+    @GetMapping("/api/compare")
+    @Operation(summary = "Get compare list for authenticated user")
+    public ResponseEntity<List<ProductDto>> getCompareItems(@RequestHeader("X-Auth-UserId") Long userId) {
+        return ResponseEntity.ok(orderService.getCompareItems(userId));
+    }
+
+    @PostMapping("/api/compare/{productId}")
+    @Operation(summary = "Add product to compare list (max 4)")
+    public ResponseEntity<Void> addToCompare(
+            @RequestHeader("X-Auth-UserId") Long userId,
+            @PathVariable Long productId) {
+        orderService.addToCompare(userId, productId);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @DeleteMapping("/api/compare/{productId}")
+    @Operation(summary = "Remove product from compare list")
+    public ResponseEntity<Void> removeFromCompare(
+            @RequestHeader("X-Auth-UserId") Long userId,
+            @PathVariable Long productId) {
+        orderService.removeFromCompare(userId, productId);
+        return ResponseEntity.noContent().build();
+    }
+
     // ── Orders ───────────────────────────────
 
     @PostMapping("/api/orders/checkout")

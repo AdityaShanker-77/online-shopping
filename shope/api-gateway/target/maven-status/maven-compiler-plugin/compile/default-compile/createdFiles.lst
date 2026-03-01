@@ -1,0 +1,4 @@
+com\shoppe\gateway\config\CorsConfig.class
+com\shoppe\gateway\ApiGatewayApplication.class
+com\shoppe\gateway\filter\AuthenticationGatewayFilterFactory$Config.class
+com\shoppe\gateway\filter\AuthenticationGatewayFilterFactory.class

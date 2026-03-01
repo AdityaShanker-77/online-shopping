@@ -19,4 +19,8 @@ export class RetailerService {
     getProducts(retailerId: number): Observable<Product[]> {
         return this.http.get<Product[]>(`/api/products/by-retailer/${retailerId}`);
     }
+
+    createProfile(profileData: any): Observable<RetailerProfile> {
+        return this.http.post<RetailerProfile>(this.apiUrl, profileData);
+    }
 }

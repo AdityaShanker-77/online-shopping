@@ -7,6 +7,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Base64;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -53,8 +58,27 @@ public class UserController {
         profile.setFullName(dto.getFullName());
         profile.setPhone(dto.getPhone());
         profile.setAddress(dto.getAddress());
-        if (profile.getUserId() == null) profile.setUserId(userId);
+        if (dto.getProfilePictureUrl() != null)
+            profile.setProfilePictureUrl(dto.getProfilePictureUrl());
+        if (profile.getUserId() == null)
+            profile.setUserId(userId);
         return ResponseEntity.ok(toDto(userProfileRepository.save(profile)));
+    }
+
+    @PostMapping("/me/picture")
+    public ResponseEntity<?> uploadProfilePicture(
+            @RequestHeader("X-Auth-User") String email,
+            @RequestParam("file") MultipartFile file) throws IOException {
+        if (file.getSize() > 2 * 1024 * 1024) {
+            return ResponseEntity.badRequest().body(Map.of("message", "File size must not exceed 2MB"));
+        }
+        String base64 = Base64.getEncoder().encodeToString(file.getBytes());
+        String dataUrl = "data:" + file.getContentType() + ";base64," + base64;
+        UserProfile profile = userProfileRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Profile not found"));
+        profile.setProfilePictureUrl(dataUrl);
+        userProfileRepository.save(profile);
+        return ResponseEntity.ok(Map.of("profilePictureUrl", dataUrl));
     }
 
     @GetMapping("/{userId}")
@@ -65,8 +89,11 @@ public class UserController {
     }
 
     private Long parseUserId(String userIdStr) {
-        try { return userIdStr != null && !userIdStr.isEmpty() ? Long.parseLong(userIdStr) : null; }
-        catch (NumberFormatException e) { return null; }
+        try {
+            return userIdStr != null && !userIdStr.isEmpty() ? Long.parseLong(userIdStr) : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     private UserProfileDto toDto(UserProfile p) {
@@ -77,6 +104,7 @@ public class UserController {
         dto.setEmail(p.getEmail());
         dto.setPhone(p.getPhone());
         dto.setAddress(p.getAddress());
+        dto.setProfilePictureUrl(p.getProfilePictureUrl());
         return dto;
     }
 }

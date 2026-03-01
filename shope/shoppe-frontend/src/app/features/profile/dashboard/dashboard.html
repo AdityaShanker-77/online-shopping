@@ -2,17 +2,29 @@
     <h2>My Profile</h2>
 
     <div *ngIf="loading" class="loading">Loading profile details...</div>
-    <div *ngIf="message" class="alert alert-danger" style="margin-bottom: 20px;">
-        <strong>API Error: </strong> {{ message }}
-    </div>
 
     <div *ngIf="!loading && profile" class="profile-layout">
 
         <div class="profile-sidebar">
-            <div class="user-avatar">
-                {{ profile.name.charAt(0).toUpperCase() }}
+            <div class="avatar-wrapper" (click)="triggerFileInput()">
+                <div class="user-avatar" *ngIf="!profile.profilePictureUrl">
+                    {{ (profile.name || profile.fullName || 'U').charAt(0).toUpperCase() }}
+                </div>
+                <img *ngIf="profile.profilePictureUrl" [src]="profile.profilePictureUrl" class="avatar-img"
+                    alt="Profile Picture" />
+                <div class="avatar-overlay">
+                    <span>📷 Change</span>
+                </div>
+                <input type="file" #fileInput accept="image/*" (change)="onFileSelected($event)"
+                    style="display: none;" />
             </div>
-            <h3>{{ profile.name }}</h3>
+            <p *ngIf="uploadMessage" class="upload-msg"
+                [class.upload-error]="uploadMessage.includes('Error') || uploadMessage.includes('exceed')">
+                {{ uploadMessage }}
+            </p>
+
+            <h3>{{ profile.name || profile.fullName || 'User' }}</h3>
+            <p class="email-text">{{ profile.email }}</p>
             <p class="role-badge" *ngFor="let role of profile.roles">{{ role.replace('ROLE_', '') }}</p>
 
             <div class="stats-box">
@@ -47,7 +59,16 @@
                 </div>
                 <div class="form-group">
                     <label>Email Address</label>
-                    <input type="email" formControlName="email" class="form-control">
+                    <input type="email" formControlName="email" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" formControlName="phone" class="form-control" placeholder="e.g. +91 9876543210">
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <textarea formControlName="address" class="form-control" rows="3"
+                        placeholder="Enter your address"></textarea>
                 </div>
                 <button type="submit" class="btn-3d btn-primary" [disabled]="profileForm.invalid">Save Changes</button>
             </form>
@@ -55,18 +76,34 @@
             <div *ngIf="!editing" class="details-view">
                 <div class="detail-group">
                     <label>Full Name</label>
-                    <p>{{ profile.name }}</p>
+                    <p>{{ profile.name || profile.fullName || '—' }}</p>
                 </div>
                 <div class="detail-group">
                     <label>Email Address</label>
                     <p>{{ profile.email }}</p>
                 </div>
+                <div class="detail-group">
+                    <label>Phone Number</label>
+                    <p>{{ profile.phone || 'Not set — click Edit Profile to add' }}</p>
+                </div>
+                <div class="detail-group">
+                    <label>Address</label>
+                    <p>{{ profile.address || 'Not set — click Edit Profile to add' }}</p>
+                </div>
+                <div class="detail-group">
+                    <label>Account Roles</label>
+                    <p>
+                        <span class="inline-badge" *ngFor="let role of profile.roles">{{ role.replace('ROLE_', '')
+                            }}</span>
+                    </p>
+                </div>
             </div>
 
             <div class="quick-links">
                 <h3>Quick Links</h3>
-                <a routerLink="/order/cart" class="link-card">My Cart</a>
-                <a routerLink="/order/wishlist" class="link-card">My Wishlist</a>
+                <a routerLink="/order/cart" class="link-card">🛒 My Cart</a>
+                <a routerLink="/order/wishlist" class="link-card">❤️ My Wishlist</a>
+                <a routerLink="/order/compare" class="link-card">🔄 Compare</a>
             </div>
         </div>
 
