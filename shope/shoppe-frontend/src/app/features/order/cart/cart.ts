@@ -3,11 +3,15 @@ import { CommonModule } from '@angular/common';
 import { OrderService } from '../services/order.service';
 import { CartItem } from '../models/order';
 import { RouterModule } from '@angular/router';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { CardComponent } from '../../../shared/components/card/card.component';
+import { ToastService } from '../../../shared/services/toast.service';
+import { LucideAngularModule, ShoppingBag, Trash2, Plus, Minus, ArrowRight } from 'lucide-angular';
 
 @Component({
     selector: 'app-cart',
     standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule, ButtonComponent, CardComponent, LucideAngularModule],
     templateUrl: './cart.html',
     styleUrls: ['./cart.css']
 })
@@ -15,7 +19,7 @@ export class Cart implements OnInit {
     cartItems: CartItem[] = [];
     loading = true;
 
-    constructor(private orderService: OrderService) { }
+    constructor(private orderService: OrderService, private toastService: ToastService) { }
 
     ngOnInit() {
         this.loadCart();
@@ -29,7 +33,7 @@ export class Cart implements OnInit {
                 this.loading = false;
             },
             error: (err) => {
-                console.error('Failed to load cart', err);
+                this.toastService.error('Failed to load cart');
                 this.loading = false;
             }
         });
@@ -43,14 +47,17 @@ export class Cart implements OnInit {
         }
         this.orderService.updateCartItem(item.id, newQuantity).subscribe({
             next: () => this.loadCart(),
-            error: (err) => console.error(err)
+            error: (err) => this.toastService.error(err?.error?.message || 'Failed to update quantity')
         });
     }
 
     removeItem(itemId: number) {
         this.orderService.removeFromCart(itemId).subscribe({
-            next: () => this.loadCart(),
-            error: (err) => console.error(err)
+            next: () => {
+                this.toastService.info('Item removed from cart');
+                this.loadCart();
+            },
+            error: (err) => this.toastService.error(err?.error?.message || 'Failed to remove item')
         });
     }
 

@@ -1,78 +1,155 @@
-<div class="checkout-container">
-    <h2>Secure Checkout</h2>
+<div class="max-w-7xl mx-auto px-6 py-10 relative min-h-[calc(100vh-80px)]">
+    <!-- Decorative Background blobs -->
+    <div class="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-1/4 left-1/4 w-80 h-80 bg-green-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-    <div *ngIf="error" class="error-banner">{{ error }}</div>
+    <header class="mb-10 text-center relative z-10">
+        <h2 class="text-3xl md:text-5xl font-black text-white mb-4 flex items-center justify-center gap-3">
+            <lucide-icon name="shield-check" class="w-10 h-10 text-green-400"></lucide-icon> Secure Checkout
+        </h2>
+        <p class="text-slate-400 text-lg">Complete your purchase safely and securely.</p>
+    </header>
 
-    <div class="checkout-layout">
-        <div class="checkout-form-container">
-            <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()">
+    <div *ngIf="error"
+        class="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-xl mb-8 text-center font-medium relative z-10 shadow-[0_0_20px_rgba(239,68,68,0.15)]">
+        {{ error }}
+    </div>
 
-                <div class="form-section">
-                    <h3>Shipping Information</h3>
+    <div class="flex flex-col lg:flex-row gap-8 relative z-10">
+        <!-- Form Section -->
+        <div class="lg:w-2/3">
+            <app-card>
+                <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-8">
 
-                    <div class="form-group">
-                        <label for="fullName">Full Name</label>
-                        <input id="fullName" type="text" formControlName="fullName" class="form-control"
-                            placeholder="John Doe">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="address">Street Address</label>
-                        <input id="address" type="text" formControlName="address" class="form-control"
-                            placeholder="123 Main St">
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group half">
-                            <label for="city">City</label>
-                            <input id="city" type="text" formControlName="city" class="form-control"
-                                placeholder="New York">
+                    <!-- Shipping Section -->
+                    <div class="pb-8 border-b border-white/5">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div
+                                class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center border border-blue-500/30">
+                                <lucide-icon name="truck" class="w-5 h-5"></lucide-icon>
+                            </div>
+                            <h3 class="text-xl font-bold text-white">Shipping Information</h3>
                         </div>
-                        <div class="form-group half">
-                            <label for="zipCode">ZIP Code</label>
-                            <input id="zipCode" type="text" formControlName="zipCode" class="form-control"
-                                placeholder="10001">
+
+                        <div class="flex flex-col gap-6">
+                            <app-input id="fullName" formControlName="fullName" label="Full Name"
+                                placeholder="e.g. John Doe" [value]="f['fullName'].value"
+                                (valueChange)="f['fullName'].setValue($event)"
+                                [error]="f['fullName'].touched && f['fullName'].invalid ? 'Full name is required' : null">
+                            </app-input>
+
+                            <app-input id="address" formControlName="address" label="Street Address"
+                                placeholder="e.g. 123 Main St, Apt 4B" [value]="f['address'].value"
+                                (valueChange)="f['address'].setValue($event)"
+                                [error]="f['address'].touched && f['address'].invalid ? 'Street address is required' : null">
+                            </app-input>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <app-input id="city" formControlName="city" label="City" placeholder="e.g. New York"
+                                    [value]="f['city'].value" (valueChange)="f['city'].setValue($event)"
+                                    [error]="f['city'].touched && f['city'].invalid ? 'City is required' : null">
+                                </app-input>
+
+                                <app-input id="zipCode" formControlName="zipCode" label="ZIP Code"
+                                    placeholder="e.g. 10001" [value]="f['zipCode'].value"
+                                    (valueChange)="f['zipCode'].setValue($event)"
+                                    [error]="f['zipCode'].touched && f['zipCode'].invalid ? 'ZIP Code is required' : null">
+                                </app-input>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="form-section">
-                    <h3>Payment Details</h3>
+                    <!-- Payment Section -->
+                    <div>
+                        <div class="flex items-center gap-3 mb-6">
+                            <div
+                                class="w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center border border-purple-500/30">
+                                <lucide-icon name="credit-card" class="w-5 h-5"></lucide-icon>
+                            </div>
+                            <h3 class="text-xl font-bold text-white">Payment Details</h3>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="cardNumber">Card Number</label>
-                        <input id="cardNumber" type="text" formControlName="cardNumber" class="form-control"
-                            placeholder="1234123412341234" maxlength="16">
+                        <div class="flex flex-col gap-6">
+                            <app-input id="cardNumber" formControlName="cardNumber" label="Card Number"
+                                placeholder="1234 5678 9101 1121" [value]="f['cardNumber'].value"
+                                (valueChange)="f['cardNumber'].setValue($event)"
+                                [error]="f['cardNumber'].touched && f['cardNumber'].invalid ? 'A valid 16-digit card number is required' : null">
+                            </app-input>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <app-input id="expiry" formControlName="expiry" label="Expiry Date (MM/YY)"
+                                    placeholder="e.g. 12/25" [value]="f['expiry'].value"
+                                    (valueChange)="f['expiry'].setValue($event)"
+                                    [error]="f['expiry'].touched && f['expiry'].invalid ? 'Valid expiry in MM/YY format is required' : null">
+                                </app-input>
+
+                                <app-input id="cvv" formControlName="cvv" label="CVV" placeholder="123"
+                                    [type]="'password'" [value]="f['cvv'].value"
+                                    (valueChange)="f['cvv'].setValue($event)"
+                                    [error]="f['cvv'].touched && f['cvv'].invalid ? 'Valid 3 or 4 digit CVV is required' : null">
+                                </app-input>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group half">
-                            <label for="expiry">Expiry Date (MM/YY)</label>
-                            <input id="expiry" type="text" formControlName="expiry" class="form-control"
-                                placeholder="12/25" maxlength="5">
-                        </div>
-                        <div class="form-group half">
-                            <label for="cvv">CVV</label>
-                            <input id="cvv" type="text" formControlName="cvv" class="form-control" placeholder="123"
-                                maxlength="4">
-                        </div>
+                    <div class="pt-4 mt-2 border-t border-white/5 flex flex-col items-end">
+                        <app-button type="submit" [variant]="'primary'"
+                            [disabled]="checkoutForm.invalid || loading || cartTotal === 0" size="lg"
+                            class="w-full md:w-auto">
+                            <span class="flex items-center gap-2">
+                                <span *ngIf="loading" class="animate-spin text-white">
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                            stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                        </path>
+                                    </svg>
+                                </span>
+                                <lucide-icon *ngIf="!loading" name="check-circle-2" class="w-5 h-5"></lucide-icon>
+                                {{ loading ? 'Processing...' : 'Place Order' }}
+                            </span>
+                        </app-button>
                     </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-submit"
-                    [disabled]="checkoutForm.invalid || loading || cartTotal === 0">
-                    {{ loading ? 'Processing...' : 'Place Order' }}
-                </button>
-            </form>
+                </form>
+            </app-card>
         </div>
 
-        <div class="checkout-summary">
-            <h3>Order Summary</h3>
-            <div class="summary-total">
-                <span>Amount to Pay</span>
-                <span>${{ cartTotal }}</span>
-            </div>
-            <p class="summary-note">By placing your order, you agree to our privacy notice and conditions of use.</p>
+        <!-- Summary Section -->
+        <div class="lg:w-1/3">
+            <app-card class="sticky top-24 block">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-white/5">
+                    <h3 class="text-xl font-bold text-white">Order Summary</h3>
+                </div>
+
+                <div class="flex flex-col gap-4 mb-6">
+                    <div class="flex justify-between items-center text-slate-300">
+                        <span>Items Total</span>
+                        <span class="font-bold text-white">${{ cartTotal }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-300">
+                        <span>Shipping</span>
+                        <span class="text-green-400 font-bold">Free</span>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-300">
+                        <span>Est. Taxes</span>
+                        <span class="font-bold text-white">$0.00</span>
+                    </div>
+                    <div class="pt-4 mt-2 border-t border-white/10 flex justify-between items-end">
+                        <span class="text-lg font-bold text-slate-400">Total to Pay</span>
+                        <span
+                            class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">${{
+                            cartTotal }}</span>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-sm text-blue-200 mt-6 flex gap-3">
+                    <lucide-icon name="shield-check" class="w-5 h-5 shrink-0 text-blue-400 mt-0.5"></lucide-icon>
+                    <p>By placing your order, you agree to our privacy notice and conditions of use. Payment is secure
+                        and encrypted.</p>
+                </div>
+            </app-card>
         </div>
     </div>
 </div>

@@ -1,24 +1,80 @@
-<div class="auth-container">
-  <h2>Login to Shopp-E</h2>
-
-  <div *ngIf="errorMessage" class="error-banner">
-    {{ errorMessage }}
+<div class="min-h-[calc(100vh-80px)] flex items-center justify-center p-6 relative overflow-hidden">
+  <!-- Interactive background blobs -->
+  <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-[100px] -z-10 animate-blob"></div>
+  <div
+    class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-500/20 rounded-full blur-[100px] -z-10 animate-blob animation-delay-2000">
   </div>
 
-  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input id="email" type="email" formControlName="email" class="form-control" />
+  <div
+    class="w-full max-w-5xl bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
+
+    <!-- Left Side: Branding / Welcome -->
+    <div
+      class="md:w-5/12 p-10 flex flex-col justify-between relative overflow-hidden bg-gradient-to-br from-blue-900/40 to-slate-900/80 border-r border-white/5">
+      <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+
+      <div class="relative z-10 flex flex-col gap-6 mt-8">
+        <h1
+          class="text-4xl md:text-5xl font-black bg-gradient-to-r from-blue-400 to-pink-500 bg-clip-text text-transparent leading-tight">
+          Welcome<br>Back
+        </h1>
+        <p class="text-slate-400 text-lg leading-relaxed">
+          Log in to access your Shopp-E account, manage your orders, and discover premium products curated just for you.
+        </p>
+      </div>
+
+      <div class="relative z-10 mt-12">
+        <div class="flex items-center gap-4 text-sm text-slate-500 font-medium">
+          <lucide-icon name="shield-check" class="w-5 h-5 text-blue-400"></lucide-icon> Secure & Encrypted Login
+        </div>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input id="password" type="password" formControlName="password" class="form-control" />
+    <!-- Right Side: Login Form -->
+    <div class="md:w-7/12 p-10 md:p-14 flex flex-col justify-center bg-slate-900/30">
+      <div class="mb-10 text-center md:text-left">
+        <h2 class="text-3xl font-bold text-white mb-2 tracking-tight">Sign In</h2>
+        <p class="text-slate-400 font-medium">Enter your details to access your account.</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+
+        <div class="flex flex-col gap-1.5 focus-within:text-blue-400 transition-colors duration-200">
+          <app-input id="email" type="email" label="Email Address" placeholder="name@example.com" [required]="true"
+            [value]="f['email'].value" (valueChange)="f['email'].setValue($event)"
+            [error]="f['email'].touched && f['email'].invalid ? 'Valid email is required' : null"
+            customClasses="bg-white/[0.03] border-white/10 focus:bg-white/[0.05] focus:border-blue-500/50 py-3 text-lg transition-all shadow-inner">
+          </app-input>
+        </div>
+
+        <div class="flex flex-col gap-1.5 focus-within:text-pink-400 transition-colors duration-200">
+          <div class="flex items-center justify-between px-1 mb-1">
+            <label class="text-sm font-semibold text-slate-300 transition-colors">Password</label>
+            <a routerLink="/auth/forgot-password"
+              class="text-sm font-bold text-blue-400 hover:text-pink-400 transition-colors duration-300">Forgot
+              password?</a>
+          </div>
+          <app-input id="password" type="password" label="" placeholder="Enter your password" [required]="true"
+            [value]="f['password'].value" (valueChange)="f['password'].setValue($event)"
+            [error]="f['password'].touched && f['password'].invalid ? 'Password is required' : null"
+            customClasses="bg-white/[0.03] border-white/10 focus:bg-white/[0.05] focus:border-pink-500/50 py-3 text-lg transition-all shadow-inner">
+          </app-input>
+        </div>
+
+        <app-button type="submit" size="full" [disabled]="loginForm.invalid" variant="primary"
+          class="mt-4 transform hover:-translate-y-1 transition-transform shadow-lg hover:shadow-blue-500/25">
+          <span class="text-lg font-bold py-1">Sign In to Shopp-E</span>
+          <lucide-icon name="arrow-right" class="w-5 h-5 ml-2"></lucide-icon>
+        </app-button>
+      </form>
+
+      <div class="mt-12 pt-6 border-t border-white/10 text-center">
+        <p class="text-slate-400 font-medium">Don't have an account?
+          <a routerLink="/auth/register"
+            class="text-pink-400 hover:text-blue-400 font-black transition-colors ml-2 hover:underline decoration-2 underline-offset-4">Create
+            one now</a>
+        </p>
+      </div>
     </div>
-
-    <button type="submit" [disabled]="!loginForm.valid" class="btn-3d btn-primary">Login</button>
-  </form>
-
-  <p class="mt-3"><a routerLink="/auth/forgot-password" class="forgot-link">Forgot your password?</a></p>
-  <p class="mt-3">Don't have an account? <a routerLink="/auth/register">Register here</a></p>
+  </div>
 </div>

@@ -1,40 +1,86 @@
-<div class="product-detail-container" *ngIf="product">
-    <a routerLink="/products" class="back-link">← Back to Catalog</a>
+<div class="max-w-6xl mx-auto px-6 py-10 relative">
+    <!-- Background blobs -->
+    <div class="absolute top-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -z-10"></div>
+    <div class="absolute bottom-0 right-0 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl -z-10"></div>
 
-    <div class="product-layout">
-        <div class="product-image">
-            <div class="placeholder" *ngIf="!product.imageUrl">No Image Available</div>
-            <img *ngIf="product.imageUrl" [src]="product.imageUrl" [alt]="product.name" />
-        </div>
+    <a routerLink="/products"
+        class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-colors font-medium">
+        <lucide-icon name="arrow-left" class="w-4 h-4"></lucide-icon> Back to Catalog
+    </a>
 
-        <div class="product-info">
-            <h1>{{ product.name }}</h1>
-            <div class="meta">
-                <span class="category">{{ product.categoryName }}</span>
-                <span class="retailer">Sold by: {{ product.retailerName }}</span>
+    <div *ngIf="product"
+        class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden p-6 md:p-10">
+        <div class="flex flex-col lg:flex-row gap-12">
+
+            <!-- Image Section -->
+            <div
+                class="lg:w-1/2 flex items-center justify-center bg-white/5 rounded-2xl p-8 border border-white/5 min-h-[400px]">
+                <div *ngIf="!product.imageUrl" class="text-slate-500 font-medium">No Image Available</div>
+                <img *ngIf="product.imageUrl" [src]="product.imageUrl" [alt]="product.name" loading="lazy"
+                    class="max-w-full max-h-[500px] object-contain drop-shadow-2xl"
+                    (error)="$any($event.target).src='https://placehold.co/500x500/png?text=No+Image'" />
             </div>
 
-            <div class="price-stock">
-                <span class="price">${{ product.price }}</span>
-                <span class="stock" [class.low-stock]="product.stock < 10">
-                    {{ product.stock > 0 ? 'In Stock: ' + product.stock : 'Out of Stock' }}
-                </span>
-            </div>
+            <!-- Details Section -->
+            <div class="lg:w-1/2 flex flex-col">
+                <div class="mb-4 flex flex-wrap gap-3 items-center">
+                    <span
+                        class="inline-flex items-center gap-1.5 px-3 py-1 bg-pink-500/10 text-pink-400 border border-pink-500/20 rounded-full text-xs font-bold uppercase tracking-wider">
+                        <lucide-icon name="tag" class="w-3.5 h-3.5"></lucide-icon> {{ product.categoryName }}
+                    </span>
+                    <span
+                        class="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-800 text-slate-300 border border-slate-700 rounded-full text-xs font-bold tracking-wider">
+                        <lucide-icon name="store" class="w-3.5 h-3.5"></lucide-icon> Sold by: {{ product.retailerName }}
+                    </span>
+                </div>
 
-            <div class="description">
-                <h3>Description</h3>
-                <p>{{ product.description || 'No description provided.' }}</p>
-            </div>
+                <h1 class="text-4xl lg:text-5xl font-black text-white mb-6 leading-tight">{{ product.name }}</h1>
 
-            <div class="actions">
-                <button class="btn-3d btn-primary" (click)="addToCart()" [disabled]="product.stock <= 0">
-                    Add to Cart
-                </button>
-                <button class="btn-3d btn-secondary" (click)="addToWishlist()">Add to Wishlist</button>
+                <div class="flex items-end gap-4 mb-8">
+                    <span class="text-5xl font-black text-white">${{ product.price }}</span>
+                    <div class="flex flex-col pb-1">
+                        <span *ngIf="product.stock > 0"
+                            class="inline-flex items-center gap-1.5 text-green-400 font-bold"
+                            [ngClass]="{'text-orange-400': product.stock < 10}">
+                            <lucide-icon name="package-check" class="w-5 h-5"></lucide-icon>
+                            {{ product.stock < 10 ? 'Only ' + product.stock + ' left' : 'In Stock: ' + product.stock }}
+                                </span>
+                                <span *ngIf="product.stock <= 0"
+                                    class="inline-flex items-center gap-1.5 text-red-500 font-bold">
+                                    <lucide-icon name="package-x" class="w-5 h-5"></lucide-icon> Out of Stock
+                                </span>
+                    </div>
+                </div>
+
+                <div class="bg-black/20 rounded-2xl p-6 border border-white/5 mb-10 flex-1">
+                    <h3 class="text-lg font-bold text-white mb-3">Description</h3>
+                    <p class="text-slate-300 leading-relaxed">{{ product.description || 'No description provided.' }}
+                    </p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 mt-auto">
+                    <app-button variant="primary" size="lg" class="flex-1" (onClick)="addToCart()"
+                        [disabled]="product.stock <= 0">
+                        <lucide-icon name="shopping-cart" class="w-5 h-5"></lucide-icon> Add to Cart
+                    </app-button>
+                    <app-button variant="secondary" size="lg" class="flex-1" (onClick)="addToWishlist()">
+                        <lucide-icon name="heart" class="w-5 h-5"></lucide-icon> Add to Wishlist
+                    </app-button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="loading" *ngIf="loading">Loading...</div>
-<div class="error" *ngIf="error">{{ error }}</div>
+    <div *ngIf="loading" class="flex items-center justify-center py-20">
+        <svg class="animate-spin h-12 w-12 text-blue-500" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+        </svg>
+    </div>
+
+    <div *ngIf="error" class="bg-red-500/10 border border-red-500/30 text-red-400 p-6 rounded-2xl text-center">
+        {{ error }}
+    </div>
+</div>

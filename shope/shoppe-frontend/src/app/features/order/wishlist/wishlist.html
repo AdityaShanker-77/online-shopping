@@ -1,33 +1,73 @@
-<div class="wishlist-container">
-    <header class="page-header">
-        <h1>Your Wishlist</h1>
-        <p>Save your favorite premium items for later.</p>
-    </header>
-
-    <div class="loading-state" *ngIf="isLoading">
-        <p>Loading your wishlist...</p>
+<div class="max-w-7xl mx-auto px-6 py-10 relative min-h-[calc(100vh-80px)]">
+    <!-- Decorative Background blobs -->
+    <div class="absolute top-0 right-0 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-1/4 left-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none">
     </div>
 
-    <div class="wishlist-grid" *ngIf="!isLoading && wishlistItems.length > 0">
-        <div class="product-card" *ngFor="let item of wishlistItems">
-            <div class="product-image-container">
-                <img [src]="item.imageUrl || 'assets/images/placeholder.png'" [alt]="item.name"
-                    onerror="this.src='https://via.placeholder.com/200?text=Product+Image'" />
+    <header class="mb-12 text-center relative z-10 block">
+        <h2
+            class="text-4xl md:text-5xl font-black bg-gradient-to-r from-pink-400 to-purple-500 bg-clip-text text-transparent mb-4 tracking-tight flex justify-center items-center gap-4">
+            <lucide-icon name="heart" class="w-10 h-10 text-pink-400"></lucide-icon> Your Wishlist
+        </h2>
+        <p class="text-xl text-slate-400 font-medium">Save your favorite premium items for later.</p>
+    </header>
+
+    <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-20 relative z-10">
+        <svg class="animate-spin h-10 w-10 text-pink-500 mb-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+        </svg>
+        <p class="text-slate-400">Curating your wishlist...</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 relative z-10"
+        *ngIf="!isLoading && wishlistItems.length > 0">
+        <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col group"
+            *ngFor="let item of wishlistItems">
+
+            <div class="h-64 overflow-hidden relative bg-white/5 flex items-center justify-center p-4">
+                <button
+                    class="absolute top-4 right-4 z-20 w-10 h-10 bg-black/20 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center text-pink-500 hover:text-white hover:bg-pink-500/80 transition-all cursor-pointer shadow-lg"
+                    (click)="removeFromWishlist(item.id)" title="Remove from Wishlist">
+                    <lucide-icon name="heart-crack" class="w-5 h-5"></lucide-icon>
+                </button>
+                <img [src]="item.imageUrl || 'https://placehold.co/400x400/png?text=No+Image'" [alt]="item.name"
+                    loading="lazy"
+                    class="max-w-full max-h-full object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500"
+                    onerror="this.onerror=null; this.src='https://placehold.co/400x400/png?text=No+Image'" />
             </div>
-            <div class="product-info">
-                <span class="product-category">{{ item.categoryName || 'General' }}</span>
-                <h3 class="product-name" [title]="item.name">{{ item.name }}</h3>
-                <div class="product-price">${{ item.price }}</div>
-                <div class="product-actions">
-                    <button class="btn-3d btn-add" (click)="moveToCart(item.id)">Move to Cart</button>
-                    <button class="btn-3d btn-danger" (click)="removeFromWishlist(item.id)">Remove</button>
+
+            <div class="p-5 flex flex-col flex-1">
+                <span class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+                    <lucide-icon name="tag" class="w-3 h-3"></lucide-icon> {{ item.categoryName || 'General' }}
+                </span>
+                <h3 class="text-lg font-bold text-white mb-2 leading-tight truncate" [title]="item.name">{{ item.name }}
+                </h3>
+                <div class="text-2xl font-black text-white mb-6">${{ item.price }}</div>
+
+                <div class="mt-auto">
+                    <app-button variant="primary" size="full" (onClick)="moveToCart(item.id, item.name)">
+                        <lucide-icon name="shopping-cart" class="w-4 h-4"></lucide-icon> Move to Cart
+                    </app-button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="empty-state" *ngIf="!isLoading && wishlistItems.length === 0">
-        <p>Your wishlist is currently empty.</p>
-        <button class="btn-3d btn-primary" routerLink="/products">Explore Products</button>
+    <!-- Empty State -->
+    <div class="flex flex-col items-center justify-center py-20 px-4 text-center bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl relative z-10"
+        *ngIf="!isLoading && wishlistItems.length === 0">
+        <div
+            class="w-24 h-24 bg-pink-500/10 border border-pink-500/20 rounded-full flex items-center justify-center mb-6 text-pink-400 shadow-[0_0_30px_rgba(236,72,153,0.2)]">
+            <lucide-icon name="heart" class="w-12 h-12"></lucide-icon>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-2">Your wishlist is empty</h3>
+        <p class="text-slate-400 mb-8 max-w-md">You haven't added any products to your wishlist yet. Explore our
+            collection and find something you love!</p>
+        <app-button routerLink="/products" variant="outline">
+            Explore Products
+        </app-button>
     </div>
 </div>

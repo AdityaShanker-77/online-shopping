@@ -1,48 +1,114 @@
-<div class="compare-container">
-    <h2>Compare Products</h2>
-    <p class="subtitle">Compare up to 4 products side-by-side</p>
+<div class="max-w-7xl mx-auto px-6 py-10 relative min-h-[calc(100vh-80px)]">
+    <!-- Decorative Background blobs -->
+    <div class="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-1/4 left-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-    <div *ngIf="loading" class="loading">Loading comparison...</div>
+    <header class="mb-10 text-center relative z-10">
+        <h2 class="text-3xl md:text-5xl font-black text-white mb-4 flex items-center justify-center gap-3">
+            <lucide-icon name="arrow-left-right" class="w-10 h-10 text-purple-400"></lucide-icon> Compare Products
+        </h2>
+        <p class="text-slate-400 text-lg">Compare up to 4 premium products side-by-side to find your perfect match.</p>
+    </header>
 
-    <div *ngIf="!loading && compareItems.length === 0" class="empty-state">
-        <p>No products to compare.</p>
-        <p class="hint">Go to <a routerLink="/products">Products</a> and click "Compare" on items you'd like to compare.
-        </p>
+    <div *ngIf="loading" class="flex flex-col items-center justify-center py-20 relative z-10">
+        <svg class="animate-spin h-10 w-10 text-purple-500 mb-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+        </svg>
+        <p class="text-slate-400">Loading comparison data...</p>
     </div>
 
-    <div *ngIf="!loading && compareItems.length > 0" class="compare-table-wrapper">
-        <table class="compare-table">
+    <!-- Empty State -->
+    <div *ngIf="!loading && compareItems.length === 0"
+        class="flex flex-col items-center justify-center py-20 px-4 text-center bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl relative z-10 shadow-2xl">
+        <div
+            class="w-24 h-24 bg-slate-800 rounded-full flex items-center justify-center mb-6 text-slate-500 border border-white/5">
+            <lucide-icon name="arrow-left-right" class="w-10 h-10"></lucide-icon>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-2">No products to compare</h3>
+        <p class="text-slate-400 mb-8 max-w-md">Browse our exquisite catalog and click "Compare" on items to view them
+            side-by-side.</p>
+        <app-button routerLink="/products" variant="primary">
+            Explore Collection
+        </app-button>
+    </div>
+
+    <!-- Comparison Table -->
+    <div *ngIf="!loading && compareItems.length > 0"
+        class="overflow-x-auto relative z-10 bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl shadow-xl custom-scrollbar pb-4">
+        <table class="w-full text-left border-collapse min-w-[800px]">
             <thead>
                 <tr>
-                    <th class="label-col">Feature</th>
-                    <th *ngFor="let item of compareItems" class="product-col">
-                        <div class="product-thumb">
-                            <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="item.name" />
-                            <div *ngIf="!item.imageUrl" class="no-image">No Image</div>
+                    <th
+                        class="p-6 border-b border-r border-white/5 bg-white/5 font-bold text-slate-400 uppercase tracking-widest text-sm w-48 align-bottom">
+                        Features</th>
+                    <th *ngFor="let item of compareItems"
+                        class="p-6 border-b border-white/5 min-w-[250px] align-bottom group relative">
+                        <div class="flex flex-col items-center text-center">
+                            <div
+                                class="w-40 h-40 bg-white/5 rounded-2xl mb-4 p-4 border border-white/10 flex items-center justify-center relative shadow-inner overflow-hidden">
+                                <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="item.name" loading="lazy"
+                                    class="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                                    (error)="$any($event.target).src='https://placehold.co/200x200/png?text=No+Image'" />
+                                <div *ngIf="!item.imageUrl" class="text-sm text-slate-500 font-medium">No Image</div>
+                            </div>
                         </div>
                     </th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td class="label-cell">Name</td>
-                    <td *ngFor="let item of compareItems" class="value-cell name-cell">{{ item.name }}</td>
+            <tbody class="divide-y divide-white/5">
+                <tr class="hover:bg-white/[0.02] transition-colors">
+                    <td class="p-6 border-r border-white/5 font-medium text-slate-400 bg-white/[0.02]">Product Name</td>
+                    <td *ngFor="let item of compareItems" class="p-6 text-lg font-bold text-white text-center">{{
+                        item.name }}</td>
+                </tr>
+                <tr class="hover:bg-white/[0.02] transition-colors">
+                    <td class="p-6 border-r border-white/5 font-medium text-slate-400 bg-white/[0.02]">Price</td>
+                    <td *ngFor="let item of compareItems" class="p-6 text-xl font-black text-blue-400 text-center">${{
+                        item.price }}</td>
+                </tr>
+                <tr class="hover:bg-white/[0.02] transition-colors">
+                    <td class="p-6 border-r border-white/5 font-medium text-slate-400 bg-white/[0.02]">Category</td>
+                    <td *ngFor="let item of compareItems" class="p-6 text-center">
+                        <span
+                            class="px-3 py-1 bg-white/10 text-slate-300 text-xs font-bold uppercase tracking-wider rounded-full border border-white/5">{{
+                            item.categoryName || 'General' }}</span>
+                    </td>
                 </tr>
                 <tr>
-                    <td class="label-cell">Price</td>
-                    <td *ngFor="let item of compareItems" class="value-cell price-cell">${{ item.price }}</td>
-                </tr>
-                <tr>
-                    <td class="label-cell">Category</td>
-                    <td *ngFor="let item of compareItems" class="value-cell">{{ item.categoryName || 'N/A' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-cell">Actions</td>
-                    <td *ngFor="let item of compareItems" class="value-cell">
-                        <button class="btn-remove" (click)="removeItem(item.id)">Remove</button>
+                    <td class="p-6 border-r border-white/5 font-medium text-slate-400 bg-white/[0.02] align-middle">
+                        Actions</td>
+                    <td *ngFor="let item of compareItems" class="p-6 text-center">
+                        <button
+                            class="inline-flex items-center justify-center gap-2 text-red-400 bg-red-500/10 hover:bg-red-500/20 px-4 py-2 rounded-xl transition-colors font-semibold"
+                            (click)="removeItem(item.id)">
+                            <lucide-icon name="trash-2" class="w-4 h-4"></lucide-icon> Remove
+                        </button>
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
 </div>
+<!-- Scoped CSS for scrollbar -->
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 9999px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 9999px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+</style>

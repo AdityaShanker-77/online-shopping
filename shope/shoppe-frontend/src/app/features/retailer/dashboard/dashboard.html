@@ -1,98 +1,247 @@
-<div class="retailer-container">
-    <h2>Retailer Dashboard</h2>
+<div class="max-w-7xl mx-auto px-6 py-10 relative min-h-[calc(100vh-80px)]">
+    <!-- Background Decor -->
+    <div class="absolute top-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none">
+    </div>
 
-    <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
-
-    <div *ngIf="loadingProfile" class="loading">Loading dashboard...</div>
-
-    <!-- Setup Store Section -->
-    <div *ngIf="!profile && !loadingProfile" class="card stats-card" style="max-width: 600px; margin: 0 auto;">
-        <div class="card-header">
-            <h3>Setup Your Store</h3>
+    <header
+        class="mb-10 text-center md:text-left relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div>
+            <h2
+                class="text-3xl md:text-5xl font-black text-white mb-2 flex items-center md:justify-start justify-center gap-3">
+                <lucide-icon name="store" class="w-10 h-10 text-blue-400"></lucide-icon> Retailer Hub
+            </h2>
+            <p class="text-slate-400 text-lg">Manage your premier boutique and inventory.</p>
         </div>
-        <div class="card-body">
-            <p style="margin-bottom: 20px; color: #666;">Welcome! Please set up your store profile before you can add
-                products to the platform. Once submitted, an Admin must approve your store.</p>
+        <div *ngIf="profile && profile.approved" class="hidden md:block">
+            <app-button variant="primary" routerLink="/retailer/product/new">
+                <lucide-icon name="plus" class="w-4 h-4"></lucide-icon> New Product
+            </app-button>
+        </div>
+    </header>
 
-            <form (ngSubmit)="createStore()">
-                <div class="form-group" style="margin-bottom: 15px;">
-                    <label>Store Name</label>
-                    <input type="text" class="form-control" name="storeName" [(ngModel)]="storeName" required
+    <div *ngIf="error"
+        class="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-xl mb-8 flex items-start gap-3 relative z-10 shadow-[0_0_20px_rgba(239,68,68,0.15)] max-w-2xl mx-auto md:mx-0">
+        <lucide-icon name="alert-circle" class="w-5 h-5 mt-0.5 shrink-0"></lucide-icon>
+        <span class="font-medium">{{ error }}</span>
+    </div>
+
+    <div *ngIf="loadingProfile" class="flex flex-col items-center justify-center py-20 relative z-10">
+        <svg class="animate-spin h-10 w-10 text-blue-500 mb-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+        </svg>
+        <p class="text-slate-400">Loading retailer dashboard...</p>
+    </div>
+
+    <!-- Setup Store Section (No Profile) -->
+    <div *ngIf="!profile && !loadingProfile" class="relative z-10 max-w-2xl mx-auto">
+        <app-card>
+            <div class="text-center mb-8">
+                <div
+                    class="w-20 h-20 bg-blue-500/20 text-blue-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-500/30">
+                    <lucide-icon name="store" class="w-10 h-10"></lucide-icon>
+                </div>
+                <h3 class="text-3xl font-bold text-white mb-2">Setup Your Boutique</h3>
+                <p class="text-slate-400">Welcome! Please set up your store profile before you can add products to the
+                    platform. Once submitted, our Admin team will review your application.</p>
+            </div>
+
+            <form (ngSubmit)="createStore()" class="flex flex-col gap-6">
+                <div class="form-group flex flex-col gap-2">
+                    <label class="text-sm font-medium text-slate-300 ml-1">Store Name</label>
+                    <input type="text" name="storeName" [(ngModel)]="storeName" required
+                        class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 backdrop-blur-sm shadow-inner transition-all"
                         placeholder="e.g. My Amazing Store">
                 </div>
 
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label>Store Description</label>
-                    <textarea class="form-control" rows="4" name="description" [(ngModel)]="description" required
+                <div class="form-group flex flex-col gap-2">
+                    <label class="text-sm font-medium text-slate-300 ml-1">Store Description</label>
+                    <textarea rows="4" name="description" [(ngModel)]="description" required
+                        class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 backdrop-blur-sm shadow-inner resize-y transition-all"
                         placeholder="Describe what you sell..."></textarea>
                 </div>
 
-                <button type="submit" class="btn-3d btn-primary" [disabled]="isCreating || !storeName || !description"
-                    style="width: 100%;">
-                    {{ isCreating ? 'Creating Store...' : 'Create Store Profile' }}
-                </button>
+                <app-button type="submit" variant="primary" size="lg"
+                    [disabled]="isCreating || !storeName || !description"
+                    class="w-full mt-4 flex items-center justify-center">
+                    <span class="flex items-center gap-2">
+                        <span *ngIf="isCreating" class="animate-spin">
+                            <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
+                            </svg>
+                        </span>
+                        {{ isCreating ? 'Submitting Application...' : 'Apply for Store Profile' }}
+                    </span>
+                </app-button>
             </form>
-        </div>
+        </app-card>
     </div>
 
-    <!-- Existing Active Store Dashboard -->
-    <div *ngIf="profile" class="dashboard-grid">
-        <!-- Store Stats Card -->
-        <div class="card stats-card">
-            <div class="card-header">
-                <h3>Store Overview</h3>
-                <span class="status-badge" [class.approved]="profile.approved">
-                    {{ profile.approved ? 'Approved' : 'Pending' }}
-                </span>
-            </div>
-            <div class="card-body">
-                <p><strong>Store Name:</strong> {{ profile.storeName || 'Not Set' }}</p>
-                <p><strong>Owner:</strong> {{ profile.ownerName }}</p>
-                <div class="revenue-box">
-                    <span class="revenue-label">Total Revenue</span>
-                    <span class="revenue-value">${{ profile.revenue || '0.00' }}</span>
+    <!-- Active Store Dashboard -->
+    <div *ngIf="profile" class="flex flex-col gap-8 relative z-10">
+
+        <!-- Top Stats Row -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Approval Status -->
+            <app-card class="flex flex-col justify-center relative overflow-hidden group">
+                <div
+                    class="absolute -right-6 -top-6 w-24 h-24 bg-white/5 rounded-full blur-xl group-hover:bg-white/10 transition-colors pointer-events-none">
                 </div>
+                <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <lucide-icon name="store" class="w-4 h-4"></lucide-icon> Status
+                </h4>
+                <div class="flex items-center gap-3">
+                    <div [ngClass]="profile.approved ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'"
+                        class="px-3 py-1.5 rounded-full border text-sm font-bold flex items-center gap-2 uppercase tracking-wide">
+                        <lucide-icon [name]="profile.approved ? 'check-circle-2' : 'alert-circle'"
+                            class="w-4 h-4"></lucide-icon>
+                        {{ profile.approved ? 'Approved' : 'Pending Approval' }}
+                    </div>
+                </div>
+            </app-card>
+
+            <!-- Store Details -->
+            <app-card class="flex flex-col justify-center">
+                <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-2">
+                    <lucide-icon name="user" class="w-4 h-4"></lucide-icon> Store Info
+                </h4>
+                <h3 class="text-xl font-bold text-white truncate">{{ profile.storeName || 'Not Set' }}</h3>
+                <p class="text-slate-400 text-sm truncate">Owner: {{ profile.ownerName }}</p>
+            </app-card>
+
+            <!-- Revenue -->
+            <app-card class="flex flex-col justify-center">
+                <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-2">
+                    <lucide-icon name="dollar-sign" class="w-4 h-4"></lucide-icon> Total Revenue
+                </h4>
+                <div
+                    class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                    ${{ profile.revenue || '0.00' }}
+                </div>
+            </app-card>
+        </div>
+
+        <div *ngIf="!profile.approved"
+            class="bg-yellow-500/10 border border-yellow-500/40 text-yellow-200 p-6 rounded-2xl flex flex-col sm:flex-row items-center sm:items-start gap-4 shadow-lg backdrop-blur-sm">
+            <div class="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center shrink-0">
+                <lucide-icon name="alert-circle" class="w-6 h-6 text-yellow-400"></lucide-icon>
+            </div>
+            <div>
+                <h4 class="text-lg font-bold text-yellow-400 mb-1">Your store is pending approval</h4>
+                <p class="text-yellow-200/80">You cannot add products or sell items until your store profile is approved
+                    by an administrator. This usually takes 1-2 business days.</p>
             </div>
         </div>
 
-        <!-- Inventory / Products Card -->
-        <div class="card inventory-card">
-            <div class="card-header">
-                <h3>My Inventory ({{ products.length }})</h3>
-                <button class="btn-3d btn-primary btn-sm" routerLink="/retailer/product/new">Add New Product</button>
+        <!-- Inventory List -->
+        <app-card *ngIf="profile.approved">
+            <div
+                class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-4 border-b border-white/5 gap-4">
+                <div>
+                    <h3 class="text-2xl font-bold text-white flex items-center gap-3">
+                        <lucide-icon name="package" class="w-6 h-6 text-purple-400"></lucide-icon> My Inventory
+                        <span class="text-sm bg-white/10 text-white px-3 py-1 rounded-full font-medium">{{
+                            products.length }} Items</span>
+                    </h3>
+                </div>
+                <!-- Mobile Only Add Product Button (Desktop is in Header) -->
+                <div class="md:hidden w-full">
+                    <app-button variant="primary" size="full" routerLink="/retailer/product/new">
+                        <lucide-icon name="plus" class="w-4 h-4"></lucide-icon> Add Product
+                    </app-button>
+                </div>
             </div>
-            <div class="card-body p-0">
-                <div *ngIf="loadingProducts" class="p-3">Loading products...</div>
 
-                <table *ngIf="!loadingProducts && products.length > 0" class="table">
+            <div *ngIf="loadingProducts" class="flex items-center justify-center py-10">
+                <svg class="animate-spin h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+            </div>
+
+            <div *ngIf="!loadingProducts && products.length === 0"
+                class="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed border-white/10 rounded-2xl bg-white/[0.02]">
+                <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center text-slate-500 mb-4">
+                    <lucide-icon name="package" class="w-8 h-8"></lucide-icon>
+                </div>
+                <h4 class="text-xl font-bold text-white mb-2">No Products Yet</h4>
+                <p class="text-slate-400 mb-6 max-w-sm">You haven't listed any products in your inventory. Add your
+                    first product to start selling!</p>
+                <app-button variant="primary" routerLink="/retailer/product/new">Add Product</app-button>
+            </div>
+
+            <div *ngIf="!loadingProducts && products.length > 0" class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse min-w-[600px]">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Price</th>
-                            <th>Stock</th>
-                            <th>Actions</th>
+                            <th
+                                class="p-4 border-b border-white/5 font-bold text-slate-400 uppercase tracking-widest text-xs">
+                                ID</th>
+                            <th
+                                class="p-4 border-b border-white/5 font-bold text-slate-400 uppercase tracking-widest text-xs">
+                                Name</th>
+                            <th
+                                class="p-4 border-b border-white/5 font-bold text-slate-400 uppercase tracking-widest text-xs text-right">
+                                Price</th>
+                            <th
+                                class="p-4 border-b border-white/5 font-bold text-slate-400 uppercase tracking-widest text-xs text-center">
+                                Stock</th>
+                            <th
+                                class="p-4 border-b border-white/5 font-bold text-slate-400 uppercase tracking-widest text-xs text-right">
+                                Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr *ngFor="let product of products">
-                            <td>{{ product.id }}</td>
-                            <td>{{ product.name }}</td>
-                            <td>${{ product.price }}</td>
-                            <td>
-                                <span [class.low-stock]="product.stock < 10">{{ product.stock }}</span>
+                    <tbody class="divide-y divide-white/5">
+                        <tr *ngFor="let product of products" class="hover:bg-white/[0.02] transition-colors group">
+                            <td class="p-4 text-slate-500 font-mono text-sm">#{{ product.id }}</td>
+                            <td class="p-4 font-bold text-white">{{ product.name }}</td>
+                            <td class="p-4 font-black text-blue-400 text-right">${{ product.price }}</td>
+                            <td class="p-4 text-center">
+                                <span
+                                    [ngClass]="product.stock < 10 ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'"
+                                    class="px-3 py-1 inline-flex rounded-full text-xs font-bold">
+                                    {{ product.stock }}
+                                </span>
                             </td>
-                            <td>
-                                <button class="btn btn-link">Edit</button>
+                            <td class="p-4 text-right">
+                                <a [routerLink]="['/retailer/product/edit', product.id]"
+                                    class="inline-flex items-center gap-2 text-slate-400 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors font-medium text-sm">
+                                    <lucide-icon name="edit" class="w-4 h-4"></lucide-icon> Edit
+                                </a>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-
-                <div *ngIf="!loadingProducts && products.length === 0" class="empty-state p-4">
-                    <p>You haven't listed any products yet.</p>
-                </div>
             </div>
-        </div>
+        </app-card>
     </div>
 </div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 9999px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 9999px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+</style>

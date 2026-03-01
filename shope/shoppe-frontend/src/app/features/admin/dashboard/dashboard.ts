@@ -3,11 +3,15 @@ import { CommonModule } from '@angular/common';
 import { AdminService } from '../services/admin.service';
 import { User } from '../../../core/models/user.model';
 import { RetailerProfile } from '../../retailer/models/retailer';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { CardComponent } from '../../../shared/components/card/card.component';
+import { ToastService } from '../../../shared/services/toast.service';
+import { LucideAngularModule, ShieldCheck, Users, Store, CheckCircle2, Trash2, AlertCircle } from 'lucide-angular';
 
 @Component({
     selector: 'app-admin-dashboard',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, ButtonComponent, CardComponent, LucideAngularModule],
     templateUrl: './dashboard.html',
     styleUrls: ['./dashboard.css']
 })
@@ -18,7 +22,10 @@ export class AdminDashboard implements OnInit {
     loadingUsers = true;
     loadingRetailers = true;
 
-    constructor(private adminService: AdminService) { }
+    constructor(
+        private adminService: AdminService,
+        private toastService: ToastService
+    ) { }
 
     ngOnInit() {
         this.loadData();
@@ -27,7 +34,7 @@ export class AdminDashboard implements OnInit {
     loadData() {
         this.loadingUsers = true;
         this.loadingRetailers = true;
-        // Load users first, then load retailers so we can cross-reference them
+
         this.adminService.getUsers().subscribe({
             next: (data) => {
                 this.users = data;
@@ -35,7 +42,7 @@ export class AdminDashboard implements OnInit {
                 this.loadRetailers();
             },
             error: (err) => {
-                console.error('Failed to load users', err);
+                this.toastService.error('Failed to load users');
                 this.loadingUsers = false;
                 this.loadRetailers();
             }
@@ -47,14 +54,12 @@ export class AdminDashboard implements OnInit {
             next: (data) => {
                 this.retailers = data;
 
-                // Cross-reference: find users with ROLE_RETAILER who haven't created a store yet
                 const mappedRetailerUserIds = this.retailers.map(r => r.userId);
                 const pendingSetupUsers = this.users.filter(u => u.roles.includes('ROLE_RETAILER') && !mappedRetailerUserIds.includes(u.id));
 
-                // Push them into the array for visual display as "Awaiting Setup"
                 pendingSetupUsers.forEach(u => {
                     this.retailers.push({
-                        id: 0, // 0 = dummy id since it has no DB record
+                        id: 0,
                         userId: u.id,
                         storeName: 'Pending Store Setup',
                         ownerName: u.name,
@@ -68,29 +73,36 @@ export class AdminDashboard implements OnInit {
                 this.loadingRetailers = false;
             },
             error: (err) => {
-                console.error('Failed to load retailers', err);
+                this.toastService.error('Failed to load retailers');
                 this.loadingRetailers = false;
             }
         });
     }
 
     approveRetailer(id: number) {
+        this.toastService.info('Approving retailer...');
         this.adminService.approveRetailer(id).subscribe({
             next: () => {
-                alert('Retailer approved successfully');
-                this.loadRetailers(); // reload list
+                this.toastService.success('Retailer approved successfully');
+                this.loadRetailers();
             },
-            error: (err) => console.error(err)
+            error: (err) => {
+                this.toastService.error('Failed to approve retailer');
+            }
         });
     }
 
     deleteRetailer(id: number) {
-        if (confirm('Are you sure you want to delete this retailer?')) {
+        if (confirm('Are you sure you want to delete this retailer? This action cannot be undone.')) {
+            this.toastService.info('Processing deletion...');
             this.adminService.deleteRetailer(id).subscribe({
                 next: () => {
+                    this.toastService.success('Retailer deleted');
                     this.loadRetailers();
                 },
-                error: (err) => console.error(err)
+                error: (err) => {
+                    this.toastService.error('Failed to delete retailer');
+                }
             });
         }
     }

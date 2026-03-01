@@ -4,11 +4,16 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ProfileService } from '../services/profile.service';
 import { UserProfile } from '../models/profile';
 import { RouterModule } from '@angular/router';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { InputComponent } from '../../../shared/components/input/input.component';
+import { CardComponent } from '../../../shared/components/card/card.component';
+import { ToastService } from '../../../shared/services/toast.service';
+import { LucideAngularModule, User, Mail, Phone, MapPin, Shield, Camera, Edit2, Check, X, ShoppingBag, Heart, ArrowLeftRight } from 'lucide-angular';
 
 @Component({
     selector: 'app-profile-dashboard',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, RouterModule],
+    imports: [CommonModule, ReactiveFormsModule, RouterModule, ButtonComponent, InputComponent, CardComponent, LucideAngularModule],
     templateUrl: './dashboard.html',
     styleUrls: ['./dashboard.css']
 })
@@ -24,7 +29,8 @@ export class ProfileDashboard implements OnInit {
 
     constructor(
         private profileService: ProfileService,
-        private fb: FormBuilder
+        private fb: FormBuilder,
+        private toastService: ToastService
     ) {
         this.profileForm = this.fb.group({
             name: ['', Validators.required],
@@ -33,6 +39,8 @@ export class ProfileDashboard implements OnInit {
             address: ['']
         });
     }
+
+    get f() { return this.profileForm.controls; }
 
     ngOnInit() {
         this.loadProfile();
@@ -52,8 +60,7 @@ export class ProfileDashboard implements OnInit {
                 this.loading = false;
             },
             error: (err) => {
-                console.error('Failed to load profile', err);
-                this.message = 'Error loading profile: ' + (err.message || 'Unknown server error');
+                this.toastService.error('Error loading profile');
                 this.loading = false;
             }
         });
@@ -61,7 +68,6 @@ export class ProfileDashboard implements OnInit {
 
     toggleEdit() {
         this.editing = !this.editing;
-        this.message = '';
         if (!this.editing && this.profile) {
             this.profileForm.patchValue({
                 name: this.profile.name || this.profile.fullName,
@@ -83,12 +89,12 @@ export class ProfileDashboard implements OnInit {
         };
         this.profileService.updateProfile(payload).subscribe({
             next: () => {
-                this.message = 'Profile updated successfully!';
+                this.toastService.success('Profile updated successfully!');
                 this.editing = false;
                 this.loadProfile();
             },
             error: (err) => {
-                this.message = err.error || 'Failed to update profile.';
+                this.toastService.error(err.error || 'Failed to update profile.');
             }
         });
     }
@@ -103,26 +109,25 @@ export class ProfileDashboard implements OnInit {
         const file = input.files[0];
 
         if (file.size > 2 * 1024 * 1024) {
-            this.uploadMessage = 'Error: File must not exceed 2MB';
+            this.toastService.error('File must not exceed 2MB');
             return;
         }
 
         if (!file.type.startsWith('image/')) {
-            this.uploadMessage = 'Error: Please select an image file';
+            this.toastService.error('Please select an image file');
             return;
         }
 
-        this.uploadMessage = 'Uploading...';
+        this.toastService.info('Uploading avatar...');
         this.profileService.uploadProfilePicture(file).subscribe({
             next: (res) => {
-                this.uploadMessage = 'Profile picture updated!';
+                this.toastService.success('Profile picture updated!');
                 if (this.profile) {
                     this.profile.profilePictureUrl = res.profilePictureUrl;
                 }
-                setTimeout(() => this.uploadMessage = '', 3000);
             },
             error: (err) => {
-                this.uploadMessage = 'Error: ' + (err?.error?.message || 'Upload failed');
+                this.toastService.error(err?.error?.message || 'Upload failed');
             }
         });
 

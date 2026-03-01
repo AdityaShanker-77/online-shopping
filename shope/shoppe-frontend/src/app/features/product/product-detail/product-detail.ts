@@ -3,13 +3,15 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ProductService } from '../services/product';
 import { Product } from '../models/product';
-
 import { OrderService } from '../../order/services/order.service';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { ToastService } from '../../../shared/services/toast.service';
+import { LucideAngularModule, Heart, ShoppingCart, ArrowLeft, PackageCheck, PackageX, Store, Tag } from 'lucide-angular';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ButtonComponent, LucideAngularModule],
   templateUrl: './product-detail.html',
   styleUrls: ['./product-detail.css']
 })
@@ -21,7 +23,8 @@ export class ProductDetail implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private productService: ProductService,
-    private orderService: OrderService
+    private orderService: OrderService,
+    private toastService: ToastService
   ) { }
 
   ngOnInit() {
@@ -40,6 +43,7 @@ export class ProductDetail implements OnInit {
       },
       error: (err) => {
         this.error = 'Failed to load product details.';
+        this.toastService.error('Failed to load product details');
         this.loading = false;
       }
     });
@@ -48,8 +52,8 @@ export class ProductDetail implements OnInit {
   addToCart() {
     if (this.product) {
       this.orderService.addToCart(this.product.id, 1).subscribe({
-        next: () => alert(`${this.product?.name} added to cart!`),
-        error: (err) => alert('Failed to add to cart.')
+        next: () => this.toastService.success(`${this.product?.name} added to cart!`),
+        error: (err) => this.toastService.error(err?.error?.message || 'Failed to add to cart.')
       });
     }
   }
@@ -57,8 +61,8 @@ export class ProductDetail implements OnInit {
   addToWishlist() {
     if (this.product) {
       this.orderService.addToWishlist(this.product.id).subscribe({
-        next: () => alert(`${this.product?.name} added to wishlist!`),
-        error: (err) => alert('Failed to add to wishlist.')
+        next: () => this.toastService.success(`${this.product?.name} added to wishlist!`),
+        error: (err) => this.toastService.error(err?.error?.message || 'Failed to add to wishlist.')
       });
     }
   }

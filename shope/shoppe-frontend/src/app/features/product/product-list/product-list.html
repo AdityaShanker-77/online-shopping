@@ -1,44 +1,92 @@
-<div class="product-catalog" *ngIf="true">
-    <header class="catalog-header">
-        <h1>Premium Collection</h1>
-        <p>Curated products from world-class retailers</p>
+<div class="max-w-7xl mx-auto px-6 py-10 relative">
+    <!-- Decorative Background blobs -->
+    <div class="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-1/2 left-0 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <header class="text-center mb-12 relative z-10">
+        <h1
+            class="text-4xl md:text-5xl font-black bg-gradient-to-r from-blue-400 to-pink-500 bg-clip-text text-transparent mb-4 tracking-tight">
+            Premium Collection</h1>
+        <p class="text-xl text-slate-400 font-medium">Curated products from world-class retailers</p>
     </header>
 
-    <div class="search-bar">
-        <select [(ngModel)]="selectedCategoryId" (change)="onSearch()" class="category-select">
-            <option [ngValue]="undefined">All Categories</option>
-            <option *ngFor="let cat of categories" [ngValue]="cat.id">{{ cat.name }}</option>
+    <div class="flex flex-col md:flex-row gap-4 justify-center items-center mb-12 max-w-3xl mx-auto relative z-10">
+        <select [(ngModel)]="selectedCategoryId" (change)="onSearch()"
+            class="w-full md:w-auto px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 backdrop-blur-md appearance-none cursor-pointer">
+            <option [ngValue]="undefined" class="bg-slate-800 text-white">All Categories</option>
+            <option *ngFor="let cat of categories" [ngValue]="cat.id" class="bg-slate-800 text-white">{{ cat.name }}
+            </option>
         </select>
-        <input type="text" [(ngModel)]="searchKeyword" placeholder="Discover products..." (keyup.enter)="onSearch()"
-            class="search-input" />
-        <button (click)="onSearch()" class="btn-search">Search</button>
+
+        <div class="relative w-full flex-1">
+            <input type="text" [(ngModel)]="searchKeyword" placeholder="Discover products..." (keyup.enter)="onSearch()"
+                class="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 backdrop-blur-md" />
+            <lucide-icon name="search"
+                class="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none"></lucide-icon>
+        </div>
+
+        <app-button variant="primary" size="lg" (click)="onSearch()">
+            <lucide-icon name="search" class="w-5 h-5"></lucide-icon> Search
+        </app-button>
     </div>
 
-    <div class="product-grid" *ngIf="products.length > 0; else noProducts">
-        <div class="product-card" *ngFor="let product of products">
-            <div class="product-image-container">
-                <img [src]="product.imageUrl || 'assets/images/placeholder.png'" [alt]="product.name"
-                    onerror="this.src='https://via.placeholder.com/200?text=Product+Image'" />
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 relative z-10"
+        *ngIf="products.length > 0; else noProducts">
+        <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col group"
+            *ngFor="let product of products">
+
+            <div class="h-64 overflow-hidden relative bg-white/5 flex items-center justify-center p-4">
+                <button
+                    class="absolute top-4 right-4 z-20 w-10 h-10 bg-black/20 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center text-slate-400 hover:text-pink-500 hover:bg-white/10 transition-all cursor-pointer group/heart shadow-lg"
+                    (click)="addToWishlist(product, $event)" title="Add to Wishlist">
+                    <lucide-icon name="heart"
+                        class="w-5 h-5 transition-transform group-active/heart:scale-75"></lucide-icon>
+                </button>
+                <img [src]="product.imageUrl || 'https://placehold.co/400x400/png?text=No+Image'" [alt]="product.name"
+                    loading="lazy"
+                    class="max-w-full max-h-full object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500"
+                    (error)="$any($event.target).src='https://placehold.co/400x400/png?text=No+Image'" />
             </div>
-            <div class="product-info">
-                <span class="product-category">{{ product.categoryName || 'General' }}</span>
-                <h3 class="product-name" [title]="product.name">{{ product.name }}</h3>
-                <div class="product-price">${{ product.price }}</div>
-                <div class="product-actions">
-                    <button class="btn-3d btn-primary" (click)="addToCart(product, $event)">Add to Cart</button>
-                    <button class="btn-3d btn-secondary" (click)="addToWishlist(product, $event)">Wishlist</button>
-                    <button class="btn-3d btn-outline" (click)="addToCompare(product, $event)">Compare</button>
-                    <button class="btn-view" [routerLink]="['/products', product.id]">View</button>
+
+            <div class="p-5 flex flex-col flex-1">
+                <span class="text-xs font-bold text-pink-400 uppercase tracking-wider mb-2">{{ product.categoryName ||
+                    'General' }}</span>
+                <h3 class="text-lg font-bold text-white mb-2 leading-tight truncate" [title]="product.name">{{
+                    product.name }}</h3>
+                <div class="text-2xl font-black text-white mb-6">${{ product.price }}</div>
+
+                <div class="mt-auto flex flex-col gap-3">
+                    <div class="flex gap-3">
+                        <app-button variant="primary" size="full" (onClick)="addToCart(product, $event)" class="flex-1">
+                            <lucide-icon name="shopping-cart" class="w-4 h-4"></lucide-icon> Cart
+                        </app-button>
+
+                        <a [routerLink]="['/products', product.id]"
+                            class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl shadow border border-slate-700 hover:border-slate-600 transition-all font-bold text-base text-center decoration-transparent gap-2">
+                            <lucide-icon name="search" class="w-4 h-4"></lucide-icon> View
+                        </a>
+                    </div>
+
+                    <app-button variant="outline" size="full" (onClick)="addToCompare(product, $event)">
+                        <lucide-icon name="arrow-left-right" class="w-4 h-4"></lucide-icon> Compare
+                    </app-button>
                 </div>
             </div>
         </div>
     </div>
 
     <ng-template #noProducts>
-        <div class="empty-state">
-            <p>We couldn't find any products matching "{{ searchKeyword }}".</p>
-            <button class="btn-search" style="margin-top: 20px;" (click)="searchKeyword=''; onSearch()">Clear
-                Search</button>
+        <div
+            class="flex flex-col items-center justify-center py-20 px-4 text-center bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl">
+            <div class="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mb-6">
+                <lucide-icon name="search" class="w-10 h-10 text-blue-400"></lucide-icon>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-2">No Products Found</h3>
+            <p class="text-slate-400 mb-8 max-w-md">We couldn't find any products matching "{{ searchKeyword }}". Try
+                checking for typos or searching a different term.</p>
+            <app-button variant="primary" (click)="searchKeyword=''; onSearch()">
+                Clear Search Results
+            </app-button>
         </div>
     </ng-template>
 </div>

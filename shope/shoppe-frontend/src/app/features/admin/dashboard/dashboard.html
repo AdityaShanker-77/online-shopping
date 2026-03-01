@@ -1,84 +1,201 @@
-<div class="admin-container">
-    <h2>Admin Dashboard</h2>
+<div class="max-w-7xl mx-auto px-6 py-10 relative min-h-[calc(100vh-80px)]">
+    <!-- Background Decor -->
+    <div class="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-1/4 left-1/4 w-80 h-80 bg-red-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-    <div class="dashboard-grid">
+    <header class="mb-10 text-center relative z-10 flex flex-col items-center">
+        <h2 class="text-3xl md:text-5xl font-black text-white mb-4 flex items-center justify-center gap-3">
+            <lucide-icon name="shield-check" class="w-10 h-10 text-red-500"></lucide-icon> System Administration
+        </h2>
+        <p class="text-slate-400 text-lg max-w-2xl">Manage users, approve retailer applications, and oversee platform
+            activity.</p>
+    </header>
+
+    <div class="flex flex-col gap-10 relative z-10">
         <!-- Retailers Management -->
-        <div class="card">
-            <div class="card-header">
-                <h3>Manage Retailers</h3>
-                <span class="badge">{{ retailers.length }}</span>
+        <app-card>
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
+                <h3 class="text-2xl font-bold text-white flex items-center gap-3">
+                    <lucide-icon name="store" class="w-6 h-6 text-blue-400"></lucide-icon> Retailer Workspaces
+                </h3>
+                <span
+                    class="bg-blue-500/20 text-blue-400 border border-blue-500/30 px-3 py-1 rounded-full text-sm font-bold">{{
+                    retailers.length }} Registrations</span>
             </div>
-            <div class="card-body p-0">
-                <div *ngIf="loadingRetailers" class="p-3">Loading retailers...</div>
 
-                <table *ngIf="!loadingRetailers && retailers.length > 0" class="table">
+            <div *ngIf="loadingRetailers" class="flex items-center justify-center py-10">
+                <svg class="animate-spin h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+            </div>
+
+            <div *ngIf="!loadingRetailers && retailers.length > 0" class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse min-w-[700px]">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Store Name</th>
-                            <th>Owner</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                            <th
+                                class="p-4 border-b border-white/5 font-bold text-slate-400 uppercase tracking-widest text-xs">
+                                ID</th>
+                            <th
+                                class="p-4 border-b border-white/5 font-bold text-slate-400 uppercase tracking-widest text-xs">
+                                Workspace Name</th>
+                            <th
+                                class="p-4 border-b border-white/5 font-bold text-slate-400 uppercase tracking-widest text-xs">
+                                Responsible Owner</th>
+                            <th
+                                class="p-4 border-b border-white/5 font-bold text-slate-400 uppercase tracking-widest text-xs">
+                                Operational Status</th>
+                            <th
+                                class="p-4 border-b border-white/5 font-bold text-slate-400 uppercase tracking-widest text-xs text-right">
+                                Administrative Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr *ngFor="let retailer of retailers">
-                            <td>{{ retailer.id }}</td>
-                            <td>{{ retailer.storeName || 'N/A' }}</td>
-                            <td>{{ retailer.ownerName }}</td>
-                            <td>
-                                <span class="status-badge" [class.approved]="retailer.approved">
-                                    {{ retailer.id === 0 ? 'Awaiting Setup' : (retailer.approved ? 'Approved' :
-                                    'Pending') }}
-                                </span>
+                    <tbody class="divide-y divide-white/5 border-b border-white/5">
+                        <tr *ngFor="let retailer of retailers" class="hover:bg-white/[0.02] transition-colors group">
+                            <td class="p-4 text-slate-500 font-mono text-sm">
+                                <span *ngIf="retailer.id !== 0">#{{ retailer.id }}</span>
+                                <span *ngIf="retailer.id === 0" class="text-slate-600">-</span>
                             </td>
-                            <td>
-                                <button *ngIf="retailer.id !== 0 && !retailer.approved" class="btn btn-sm btn-success"
-                                    (click)="approveRetailer(retailer.id)">Approve</button>
-                                <button *ngIf="retailer.id !== 0" class="btn btn-sm btn-danger ml-2"
-                                    (click)="deleteRetailer(retailer.id)">Delete</button>
-                                <span *ngIf="retailer.id === 0"
-                                    style="color: #888; font-size: 0.85rem; font-style: italic;">Must setup store
-                                    first</span>
+                            <td class="p-4">
+                                <span class="font-bold"
+                                    [ngClass]="retailer.id === 0 ? 'text-slate-500 italic' : 'text-white'">{{
+                                    retailer.storeName || 'Not configured' }}</span>
+                            </td>
+                            <td class="p-4">
+                                <div class="flex flex-col">
+                                    <span class="text-white font-medium">{{ retailer.ownerName }}</span>
+                                    <span class="text-slate-500 text-xs">{{ retailer.email }}</span>
+                                </div>
+                            </td>
+                            <td class="p-4">
+                                <div *ngIf="retailer.id === 0"
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-800/50 text-slate-400 text-xs font-bold border border-slate-700/50 w-fit">
+                                    <lucide-icon name="alert-circle" class="w-3.5 h-3.5"></lucide-icon> Awaiting Setup
+                                </div>
+                                <div *ngIf="retailer.id !== 0 && retailer.approved"
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-green-500/10 text-green-400 text-xs font-bold border border-green-500/20 w-fit">
+                                    <lucide-icon name="check-circle-2" class="w-3.5 h-3.5"></lucide-icon> Approved
+                                </div>
+                                <div *ngIf="retailer.id !== 0 && !retailer.approved"
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-yellow-500/10 text-yellow-400 text-xs font-bold border border-yellow-500/20 w-fit">
+                                    <lucide-icon name="alert-circle" class="w-3.5 h-3.5"></lucide-icon> Pending Review
+                                </div>
+                            </td>
+                            <td class="p-4 text-right flex justify-end gap-2 items-center">
+                                <div *ngIf="retailer.id === 0" class="text-xs italic text-slate-500">
+                                    No actions available
+                                </div>
+                                <button *ngIf="retailer.id !== 0 && !retailer.approved"
+                                    class="inline-flex items-center gap-1 bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+                                    (click)="approveRetailer(retailer.id)">
+                                    <lucide-icon name="check-circle-2" class="w-3.5 h-3.5"></lucide-icon> Approve
+                                </button>
+                                <button *ngIf="retailer.id !== 0"
+                                    class="inline-flex items-center gap-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+                                    (click)="deleteRetailer(retailer.id)">
+                                    <lucide-icon name="trash-2" class="w-3.5 h-3.5"></lucide-icon> Revoke
+                                </button>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-
-                <div *ngIf="!loadingRetailers && retailers.length === 0" class="p-4 text-center">
-                    <p>No retailers found.</p>
-                </div>
             </div>
-        </div>
+
+            <div *ngIf="!loadingRetailers && retailers.length === 0"
+                class="flex flex-col items-center justify-center py-10 text-center opacity-70">
+                <lucide-icon name="store" class="w-12 h-12 text-slate-500 mb-3"></lucide-icon>
+                <p class="text-slate-400">No retailer applications found.</p>
+            </div>
+        </app-card>
 
         <!-- Users Management -->
-        <div class="card mt-4">
-            <div class="card-header">
-                <h3>Registered Users</h3>
-                <span class="badge">{{ users.length }}</span>
+        <app-card>
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
+                <h3 class="text-2xl font-bold text-white flex items-center gap-3">
+                    <lucide-icon name="users" class="w-6 h-6 text-purple-400"></lucide-icon> Platform Members
+                </h3>
+                <span
+                    class="bg-purple-500/20 text-purple-400 border border-purple-500/30 px-3 py-1 rounded-full text-sm font-bold">{{
+                    users.length }} Users</span>
             </div>
-            <div class="card-body p-0">
-                <div *ngIf="loadingUsers" class="p-3">Loading users...</div>
 
-                <table *ngIf="!loadingUsers && users.length > 0" class="table">
+            <div *ngIf="loadingUsers" class="flex items-center justify-center py-10">
+                <svg class="animate-spin h-8 w-8 text-purple-500" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+            </div>
+
+            <div *ngIf="!loadingUsers && users.length > 0" class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse min-w-[500px]">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Email</th>
-                            <th>Roles</th>
+                            <th
+                                class="p-4 border-b border-white/5 font-bold text-slate-400 uppercase tracking-widest text-xs w-24">
+                                Acc ID</th>
+                            <th
+                                class="p-4 border-b border-white/5 font-bold text-slate-400 uppercase tracking-widest text-xs">
+                                Email Address</th>
+                            <th
+                                class="p-4 border-b border-white/5 font-bold text-slate-400 uppercase tracking-widest text-xs">
+                                Active Roles</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr *ngFor="let user of users">
-                            <td>{{ user.id }}</td>
-                            <td>{{ user.email }}</td>
-                            <td>
-                                <span class="role-badge">{{ user.roles ? user.roles.join(', ') : 'USER' }}</span>
+                    <tbody class="divide-y divide-white/5 border-b border-white/5">
+                        <tr *ngFor="let user of users" class="hover:bg-white/[0.02] transition-colors">
+                            <td class="p-4 text-slate-500 font-mono text-sm">#{{ user.id }}</td>
+                            <td class="p-4 font-medium text-white">{{ user.email }}</td>
+                            <td class="p-4">
+                                <div class="flex gap-2 flex-wrap">
+                                    <span *ngFor="let role of user.roles"
+                                        class="px-2.5 py-1 text-xs font-bold rounded-md border text-slate-300 tracking-wide"
+                                        [ngClass]="{
+                                            'bg-red-500/10 border-red-500/20 text-red-300': role === 'ROLE_ADMIN',
+                                            'bg-blue-500/10 border-blue-500/20 text-blue-300': role === 'ROLE_RETAILER',
+                                            'bg-white/5 border-white/10': role === 'ROLE_USER' || (!role.includes('ADMIN') && !role.includes('RETAILER'))
+                                        }">
+                                        {{ role.replace('ROLE_', '') }}
+                                    </span>
+                                    <span *ngIf="!user.roles || user.roles.length === 0"
+                                        class="px-2.5 py-1 bg-white/5 border border-white/10 text-slate-300 text-xs font-bold rounded-md tracking-wide">
+                                        USER
+                                    </span>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-        </div>
+
+            <div *ngIf="!loadingUsers && users.length === 0"
+                class="flex flex-col items-center justify-center py-10 text-center opacity-70">
+                <p class="text-slate-400">No users found.</p>
+            </div>
+        </app-card>
     </div>
 </div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 9999px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 9999px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+</style>

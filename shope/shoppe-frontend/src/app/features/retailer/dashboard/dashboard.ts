@@ -6,11 +6,16 @@ import { AuthService } from '../../../core/services/auth.service';
 import { RetailerProfile } from '../models/retailer';
 import { Product } from '../../product/models/product';
 import { RouterModule } from '@angular/router';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { InputComponent } from '../../../shared/components/input/input.component';
+import { CardComponent } from '../../../shared/components/card/card.component';
+import { ToastService } from '../../../shared/services/toast.service';
+import { LucideAngularModule, Store, User, DollarSign, Package, Edit, Plus, AlertCircle, CheckCircle2 } from 'lucide-angular';
 
 @Component({
     selector: 'app-retailer-dashboard',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule],
+    imports: [CommonModule, RouterModule, FormsModule, ButtonComponent, InputComponent, CardComponent, LucideAngularModule],
     templateUrl: './dashboard.html',
     styleUrls: ['./dashboard.css']
 })
@@ -28,7 +33,8 @@ export class RetailerDashboard implements OnInit {
 
     constructor(
         private retailerService: RetailerService,
-        private authService: AuthService
+        private authService: AuthService,
+        private toastService: ToastService
     ) { }
 
     ngOnInit() {
@@ -48,7 +54,7 @@ export class RetailerDashboard implements OnInit {
                         this.loadingProducts = false;
                     },
                     error: (err) => {
-                        console.error('Failed to load products', err);
+                        this.toastService.error('Failed to load products');
                         this.loadingProducts = false;
                     }
                 });
@@ -57,6 +63,7 @@ export class RetailerDashboard implements OnInit {
                 // Ignore 404, just means no profile yet
                 if (err.status !== 404) {
                     this.error = 'Failed to load retailer profile. Are you an approved retailer?';
+                    this.toastService.error(this.error);
                 }
                 this.loadingProfile = false;
                 this.loadingProducts = false;
@@ -71,6 +78,7 @@ export class RetailerDashboard implements OnInit {
         if (!user) return;
 
         this.isCreating = true;
+        this.toastService.info('Creating your store profile...');
         const payload = {
             userId: user.id,
             storeName: this.storeName,
@@ -82,9 +90,11 @@ export class RetailerDashboard implements OnInit {
                 this.profile = data;
                 this.isCreating = false;
                 this.error = '';
+                this.toastService.success('Store profile created successfully! Pending admin approval.');
             },
             error: (err) => {
                 this.error = 'Failed to create store. Please try again.';
+                this.toastService.error(this.error);
                 this.isCreating = false;
             }
         });
