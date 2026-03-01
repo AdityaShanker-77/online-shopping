@@ -1,0 +1,5 @@
+com\shoppe\retailer\dto\RetailerDto.class
+com\shoppe\retailer\RetailerServiceApplication.class
+com\shoppe\retailer\controller\RetailerController.class
+com\shoppe\retailer\model\Retailer.class
+com\shoppe\retailer\repository\RetailerRepository.class

@@ -1,0 +1,74 @@
+<div class="profile-container">
+    <h2>My Profile</h2>
+
+    <div *ngIf="loading" class="loading">Loading profile details...</div>
+    <div *ngIf="message" class="alert alert-danger" style="margin-bottom: 20px;">
+        <strong>API Error: </strong> {{ message }}
+    </div>
+
+    <div *ngIf="!loading && profile" class="profile-layout">
+
+        <div class="profile-sidebar">
+            <div class="user-avatar">
+                {{ profile.name.charAt(0).toUpperCase() }}
+            </div>
+            <h3>{{ profile.name }}</h3>
+            <p class="role-badge" *ngFor="let role of profile.roles">{{ role.replace('ROLE_', '') }}</p>
+
+            <div class="stats-box">
+                <div class="stat">
+                    <span class="stat-value">{{ profile.orderCount }}</span>
+                    <span class="stat-label">Orders</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">{{ profile.wishlistCount }}</span>
+                    <span class="stat-label">Wishlist Items</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-content">
+            <div class="content-header">
+                <h3>Account Details</h3>
+                <button class="btn-3d btn-outline" (click)="toggleEdit()">
+                    {{ editing ? 'Cancel' : 'Edit Profile' }}
+                </button>
+            </div>
+
+            <div *ngIf="message" class="alert"
+                [ngClass]="{'alert-success': message.includes('success'), 'alert-danger': !message.includes('success')}">
+                {{ message }}
+            </div>
+
+            <form *ngIf="editing" [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" formControlName="name" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" formControlName="email" class="form-control">
+                </div>
+                <button type="submit" class="btn-3d btn-primary" [disabled]="profileForm.invalid">Save Changes</button>
+            </form>
+
+            <div *ngIf="!editing" class="details-view">
+                <div class="detail-group">
+                    <label>Full Name</label>
+                    <p>{{ profile.name }}</p>
+                </div>
+                <div class="detail-group">
+                    <label>Email Address</label>
+                    <p>{{ profile.email }}</p>
+                </div>
+            </div>
+
+            <div class="quick-links">
+                <h3>Quick Links</h3>
+                <a routerLink="/order/cart" class="link-card">My Cart</a>
+                <a routerLink="/order/wishlist" class="link-card">My Wishlist</a>
+            </div>
+        </div>
+
+    </div>
+</div>

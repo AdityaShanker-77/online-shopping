@@ -1,0 +1,5 @@
+com\shoppe\user\model\UserProfile.class
+com\shoppe\user\repository\UserProfileRepository.class
+com\shoppe\user\controller\UserController.class
+com\shoppe\user\dto\UserProfileDto.class
+com\shoppe\user\UserServiceApplication.class

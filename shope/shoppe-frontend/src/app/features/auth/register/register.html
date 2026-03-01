@@ -1,0 +1,47 @@
+<div class="auth-container">
+    <h2>Join Shopp-E</h2>
+
+    <div *ngIf="errorMessage" class="error-banner">{{ errorMessage }}</div>
+    <div *ngIf="successMessage" class="success-banner">{{ successMessage }}</div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+            <label for="name">Full Name</label>
+            <input id="name" type="text" formControlName="name" class="form-control" />
+            <div *ngIf="registerForm.get('name')?.invalid && registerForm.get('name')?.touched"
+                class="text-danger small">
+                Name is required.
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input id="email" type="email" formControlName="email" class="form-control" />
+            <div *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+                class="text-danger small">
+                Valid email is required.
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input id="password" type="password" formControlName="password" class="form-control" />
+            <div *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+                class="text-danger small">
+                Password must be at least 6 characters long.
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="role">Account Type</label>
+            <select id="role" formControlName="role" class="form-control">
+                <option value="USER">Customer</option>
+                <option value="RETAILER">Retailer</option>
+            </select>
+        </div>
+
+        <button type="submit" [disabled]="!registerForm.valid" class="btn-3d btn-primary">Register</button>
+    </form>
+
+    <p class="mt-3">Already have an account? <a routerLink="/auth/login">Login here</a></p>
+</div>

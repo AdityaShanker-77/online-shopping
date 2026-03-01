@@ -1,0 +1,40 @@
+<div class="product-detail-container" *ngIf="product">
+    <a routerLink="/products" class="back-link">← Back to Catalog</a>
+
+    <div class="product-layout">
+        <div class="product-image">
+            <div class="placeholder" *ngIf="!product.imageUrl">No Image Available</div>
+            <img *ngIf="product.imageUrl" [src]="product.imageUrl" [alt]="product.name" />
+        </div>
+
+        <div class="product-info">
+            <h1>{{ product.name }}</h1>
+            <div class="meta">
+                <span class="category">{{ product.categoryName }}</span>
+                <span class="retailer">Sold by: {{ product.retailerName }}</span>
+            </div>
+
+            <div class="price-stock">
+                <span class="price">${{ product.price }}</span>
+                <span class="stock" [class.low-stock]="product.stock < 10">
+                    {{ product.stock > 0 ? 'In Stock: ' + product.stock : 'Out of Stock' }}
+                </span>
+            </div>
+
+            <div class="description">
+                <h3>Description</h3>
+                <p>{{ product.description || 'No description provided.' }}</p>
+            </div>
+
+            <div class="actions">
+                <button class="btn-3d btn-primary" (click)="addToCart()" [disabled]="product.stock <= 0">
+                    Add to Cart
+                </button>
+                <button class="btn-3d btn-secondary" (click)="addToWishlist()">Add to Wishlist</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="loading" *ngIf="loading">Loading...</div>
+<div class="error" *ngIf="error">{{ error }}</div>

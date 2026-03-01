@@ -1,0 +1,16 @@
+C:\Users\Aditya.Shanker\Downloads\shope\shope\auth-service\src\main\java\com\shoppe\auth\model\RoleName.java
+C:\Users\Aditya.Shanker\Downloads\shope\shope\auth-service\src\main\java\com\shoppe\auth\security\CustomUserDetailsService.java
+C:\Users\Aditya.Shanker\Downloads\shope\shope\auth-service\src\main\java\com\shoppe\auth\dto\JwtResponse.java
+C:\Users\Aditya.Shanker\Downloads\shope\shope\auth-service\src\main\java\com\shoppe\auth\repository\RoleRepository.java
+C:\Users\Aditya.Shanker\Downloads\shope\shope\auth-service\src\main\java\com\shoppe\auth\AuthServiceApplication.java
+C:\Users\Aditya.Shanker\Downloads\shope\shope\auth-service\src\main\java\com\shoppe\auth\model\Role.java
+C:\Users\Aditya.Shanker\Downloads\shope\shope\auth-service\src\main\java\com\shoppe\auth\dto\LoginRequest.java
+C:\Users\Aditya.Shanker\Downloads\shope\shope\auth-service\src\main\java\com\shoppe\auth\model\User.java
+C:\Users\Aditya.Shanker\Downloads\shope\shope\auth-service\src\main\java\com\shoppe\auth\dto\SignupRequest.java
+C:\Users\Aditya.Shanker\Downloads\shope\shope\auth-service\src\main\java\com\shoppe\auth\security\JwtAuthenticationFilter.java
+C:\Users\Aditya.Shanker\Downloads\shope\shope\auth-service\src\main\java\com\shoppe\auth\controller\AuthController.java
+C:\Users\Aditya.Shanker\Downloads\shope\shope\auth-service\src\main\java\com\shoppe\auth\security\JwtUtils.java
+C:\Users\Aditya.Shanker\Downloads\shope\shope\auth-service\src\main\java\com\shoppe\auth\config\DatabaseSeeder.java
+C:\Users\Aditya.Shanker\Downloads\shope\shope\auth-service\src\main\java\com\shoppe\auth\dto\MessageResponse.java
+C:\Users\Aditya.Shanker\Downloads\shope\shope\auth-service\src\main\java\com\shoppe\auth\security\SecurityConfig.java
+C:\Users\Aditya.Shanker\Downloads\shope\shope\auth-service\src\main\java\com\shoppe\auth\repository\UserRepository.java

@@ -1,0 +1,80 @@
+<div class="admin-container">
+    <h2>Admin Dashboard</h2>
+
+    <div class="dashboard-grid">
+        <!-- Retailers Management -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Manage Retailers</h3>
+                <span class="badge">{{ retailers.length }}</span>
+            </div>
+            <div class="card-body p-0">
+                <div *ngIf="loadingRetailers" class="p-3">Loading retailers...</div>
+
+                <table *ngIf="!loadingRetailers && retailers.length > 0" class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Store Name</th>
+                            <th>Owner</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let retailer of retailers">
+                            <td>{{ retailer.id }}</td>
+                            <td>{{ retailer.storeName || 'N/A' }}</td>
+                            <td>{{ retailer.ownerName }}</td>
+                            <td>
+                                <span class="status-badge" [class.approved]="retailer.approved">
+                                    {{ retailer.approved ? 'Approved' : 'Pending' }}
+                                </span>
+                            </td>
+                            <td>
+                                <button *ngIf="!retailer.approved" class="btn btn-sm btn-success"
+                                    (click)="approveRetailer(retailer.id)">Approve</button>
+                                <button class="btn btn-sm btn-danger ml-2"
+                                    (click)="deleteRetailer(retailer.id)">Delete</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div *ngIf="!loadingRetailers && retailers.length === 0" class="p-4 text-center">
+                    <p>No retailers found.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Management -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3>Registered Users</h3>
+                <span class="badge">{{ users.length }}</span>
+            </div>
+            <div class="card-body p-0">
+                <div *ngIf="loadingUsers" class="p-3">Loading users...</div>
+
+                <table *ngIf="!loadingUsers && users.length > 0" class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Email</th>
+                            <th>Roles</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let user of users">
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <span class="role-badge">{{ user.roles ? user.roles.join(', ') : 'USER' }}</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

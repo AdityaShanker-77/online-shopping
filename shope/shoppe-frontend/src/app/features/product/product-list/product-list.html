@@ -1,0 +1,43 @@
+<div class="product-catalog" *ngIf="true">
+    <header class="catalog-header">
+        <h1>Premium Collection</h1>
+        <p>Curated products from world-class retailers</p>
+    </header>
+
+    <div class="search-bar">
+        <select [(ngModel)]="selectedCategoryId" (change)="onSearch()" class="category-select">
+            <option [ngValue]="undefined">All Categories</option>
+            <option *ngFor="let cat of categories" [ngValue]="cat.id">{{ cat.name }}</option>
+        </select>
+        <input type="text" [(ngModel)]="searchKeyword" placeholder="Discover products..." (keyup.enter)="onSearch()"
+            class="search-input" />
+        <button (click)="onSearch()" class="btn-search">Search</button>
+    </div>
+
+    <div class="product-grid" *ngIf="products.length > 0; else noProducts">
+        <div class="product-card" *ngFor="let product of products">
+            <div class="product-image-container">
+                <img [src]="product.imageUrl || 'assets/images/placeholder.png'" [alt]="product.name"
+                    onerror="this.src='https://via.placeholder.com/200?text=Product+Image'" />
+            </div>
+            <div class="product-info">
+                <span class="product-category">{{ product.categoryName || 'General' }}</span>
+                <h3 class="product-name" [title]="product.name">{{ product.name }}</h3>
+                <div class="product-price">${{ product.price }}</div>
+                <div class="product-actions">
+                    <button class="btn-3d btn-primary" (click)="addToCart(product, $event)">Add to Cart</button>
+                    <button class="btn-3d btn-secondary" (click)="addToWishlist(product, $event)">Wishlist</button>
+                    <button class="btn-view" [routerLink]="['/products', product.id]">View</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #noProducts>
+        <div class="empty-state">
+            <p>We couldn't find any products matching "{{ searchKeyword }}".</p>
+            <button class="btn-search" style="margin-top: 20px;" (click)="searchKeyword=''; onSearch()">Clear
+                Search</button>
+        </div>
+    </ng-template>
+</div>

@@ -1,0 +1,67 @@
+<div class="retailer-container">
+    <h2>Retailer Dashboard</h2>
+
+    <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+    <div *ngIf="loadingProfile" class="loading">Loading dashboard...</div>
+
+    <div *ngIf="profile" class="dashboard-grid">
+        <!-- Store Stats Card -->
+        <div class="card stats-card">
+            <div class="card-header">
+                <h3>Store Overview</h3>
+                <span class="status-badge" [class.approved]="profile.approved">
+                    {{ profile.approved ? 'Approved' : 'Pending' }}
+                </span>
+            </div>
+            <div class="card-body">
+                <p><strong>Store Name:</strong> {{ profile.storeName || 'Not Set' }}</p>
+                <p><strong>Owner:</strong> {{ profile.ownerName }}</p>
+                <div class="revenue-box">
+                    <span class="revenue-label">Total Revenue</span>
+                    <span class="revenue-value">${{ profile.revenue || '0.00' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory / Products Card -->
+        <div class="card inventory-card">
+            <div class="card-header">
+                <h3>My Inventory ({{ products.length }})</h3>
+                <button class="btn-3d btn-primary btn-sm" routerLink="/retailer/product/new">Add New Product</button>
+            </div>
+            <div class="card-body p-0">
+                <div *ngIf="loadingProducts" class="p-3">Loading products...</div>
+
+                <table *ngIf="!loadingProducts && products.length > 0" class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let product of products">
+                            <td>{{ product.id }}</td>
+                            <td>{{ product.name }}</td>
+                            <td>${{ product.price }}</td>
+                            <td>
+                                <span [class.low-stock]="product.stock < 10">{{ product.stock }}</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-link">Edit</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div *ngIf="!loadingProducts && products.length === 0" class="empty-state p-4">
+                    <p>You haven't listed any products yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

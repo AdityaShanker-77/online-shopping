@@ -1,0 +1,144 @@
+Shopp-E Development Handover Document
+1. Project Overview
+Shopp-E is a lightweight, resource-efficient e-commerce platform enabling multiple companies and individuals to sell products online. It supports full CRUD for products and user data, emphasizing user-friendly, responsive interfaces and adhering to DRY principles. The system offers real-time search, filtering, sorting, and a mobile-friendly UI. Key goals include fast, seamless shopping (with features like product comparison and wishlists) and expanding access for small retailers. User roles in Shopp-E are Admin, Retailer, and Customer/User. Admins manage the platform (e.g. verifying retailer updates and managing retailers), Retailers add and update their product catalogs and view sales, and Customers browse, compare, wishlist, and purchase products.
+2. Technology Stack
+Backend: Java with Spring Boot (latest stable), using Spring Security for auth and Spring Data JPA/Hibernate for persistence. JWT (JSON Web Tokens) will handle stateless authentication
+.
+Frontend: Angular (e.g. v21, the latest stable release). The Angular CLI will scaffold modules and components for a modular, maintainable client app. Angular’s HTTP client will consume the REST API.
+Database: A relational DB such as MySQL or PostgreSQL, using JPA/Hibernate for ORM. The data schema follows a normalized design (3NF) appropriate for transactional workloads
+.
+Authentication: JWT tokens issued on login (signed, with expiration) for stateless auth; HTTPS/TLS in transit. Passwords use strong hashing (BCrypt) before storage
+.
+Tools: Maven for builds, Git for version control, Postman for API testing, and Swagger/OpenAPI (e.g. springdoc) for API documentation and interactive UI
+. Continuous integration can use Jenkins/GitHub Actions to build, test, and dockerize.
+3. System Architecture
+Shopp-E uses a microservices architecture: each core feature is a separate service (loosely coupled, independently deployable)
+. Suggested service boundaries include:
+Auth Service: Handles login/signup, JWT token issuance, and password reset (OTP) workflows.
+User/Customer Service: Manages customer profiles, roles, and session data.
+Retailer Service: Manages retailer profiles and product catalog submissions.
+Admin Service: Handles platform administration (e.g. approving retailers, managing users).
+Product Service: CRUD operations on products and categories.
+Order Service: Shopping cart, wishlist, checkout, and order history.
+Services communicate via RESTful APIs using JSON. Each service has a well-defined set of DTOs (Data Transfer Objects) for requests/responses, decoupling domain models from API payloads
+. An API Gateway (e.g. Spring Cloud Gateway) can front the services, routing requests and handling cross-cutting concerns (like authentication checking). All services will be containerized (Docker) for ease of deployment. In development, Docker Compose can spin up all containers (e.g. API gateway, auth, product, order, user, retailer, admin, and a database). The system is cloud-ready (e.g. deploy to AWS ECS/EKS or Azure AKS). Each microservice runs in its own container with its own repo and pipeline (aligning with the microservice pattern)
+.
+4. Database Design
+Key entities and tables (with relationships) include:
+User (User_ID, name, email, password_hash, roles, …) – holds customers, retailers, and admins (distinguished by roles). A user can have multiple Roles (many-to-many via a join table) such as USER, RETAILER, ADMIN.
+Role (Role_ID, name) – e.g. USER, RETAILER, ADMIN.
+Retailer (Retailer_ID, user_id, store_name, revenue, …) – extra profile for retailers (linked to User).
+Product (Product_ID, name, description, price, stock, category_id, retailer_id, …) – items for sale, belonging to one Category and one Retailer.
+Category (Category_ID, name, …) – groups products. A category can have many products (1:N relationship).
+Wishlist (Wishlist_ID, user_id, product_id) – join table for products a user has wishlisted. Each Wishlist entry links a User to a Product. (Customers can wishlist items before buying.)
+CartItem (CartItem_ID, user_id, product_id, quantity) – items in the user’s shopping cart. Each cart item links a User to a Product with a quantity. Users can add/update quantity on cart items (dynamic price update).
+Order (Order_ID, user_id, order_date, total_amount, status, shipping_address, …) – records completed purchases. A User can have many Orders (1:N)
+.
+OrderItem (OrderItem_ID, order_id, product_id, quantity, price_at_purchase) – each product line in an order (dependent on Order, which is 1:N to OrderItems).
+ProductComparison (Comparison_ID, user_id, product_ids…) – optional table to store lists of products a user is comparing (up to 4 as per requirements). Each user can compare several sets of products.
+Admin (Admin_ID, user_id) – optional; could be part of User roles instead.
+The ER relationships follow standard e-commerce patterns: a customer User has one-to-many Orders, and one-to-many CartItems and Wishlist entries
+. Each CartItem or Wishlist entry is linked to exactly one Product (many-to-one)
+. Products reference a Category (many products can belong to one category). Retailers (linked via User) are associated with products they supply. All tables use surrogate primary keys. Sensitive fields (password_hash) are stored securely; other sensitive data (e.g. payment info) should be encrypted at rest per compliance requirements.
+5. API Design
+All services expose RESTful JSON APIs. Below are representative endpoints (using typical Spring Boot patterns):
+Authentication:
+POST /auth/login – User submits email/password; returns JWT on success
+.
+POST /auth/signup – User registers (fills name, email, password, etc); password is hashed with BCrypt before saving
+.
+POST /auth/forgot-password – User requests password reset; system sends an OTP to their email.
+POST /auth/reset-password – User submits OTP and new password.
+Users:
+GET /users/me – Get current user profile (requires JWT).
+PUT /users/me – Update profile info.
+GET /users/{id} (Admin-only) – Admin can view any user profile.
+Products/Categories:
+GET /products – List/search products (with query params for keyword, filters, pagination).
+GET /products/{id} – Product details.
+POST /products – Create new product (RETAILER or ADMIN).
+PUT /products/{id} – Update product (RETAILER or ADMIN).
+DELETE /products/{id} – Remove product (RETAILER or ADMIN).
+GET /categories – List categories.
+POST /categories – Create category (ADMIN).
+PUT /categories/{id}, DELETE /categories/{id} – Manage categories (ADMIN).
+Cart & Wishlist:
+GET /cart – View items in current user’s cart.
+POST /cart – Add product to cart (JSON: productId, quantity).
+PUT /cart/{itemId} – Update quantity or remove (quantity=0).
+GET /wishlist – View current user’s wishlist.
+POST /wishlist – Add product to wishlist.
+DELETE /wishlist/{itemId} – Remove from wishlist.
+Comparison:
+GET /compare – List products in current user’s comparison list.
+POST /compare – Add a product to compare (up to 4 allowed).
+DELETE /compare/{id} – Remove a comparison item.
+Orders/Checkout:
+POST /orders – Checkout: convert cart into an Order (includes shipping/payment info).
+GET /orders – List current user’s past orders.
+GET /orders/{id} – View details of a specific order.
+Retailer Actions:
+GET /retailer/products – List products for current retailer.
+PUT /retailer/products/{id} – Retailer updates stock/price.
+GET /retailer/sales – View total revenue and sales data.
+Admin Actions:
+GET /admin/retailers – View all retailers.
+POST /admin/retailers – Add a new retailer.
+DELETE /admin/retailers/{id} – Remove a retailer.
+PUT /admin/retailers/{id}/approve – Approve retailer account changes.
+GET /admin/products – View all products across retailers (for oversight).
+Each endpoint returns a structured JSON response. Errors use appropriate HTTP status codes (4xx/5xx) and a consistent error format (e.g. { status, message, errors }). Authentication is via the Authorization: Bearer <token> header. All input/output uses DTO classes to avoid exposing internal models directly
+. Controllers should use Spring’s ResponseEntity and exception handlers (@ControllerAdvice) for uniform error responses.
+6. Security Model
+Shopp-E enforces role-based access control. Using Spring Security, we assign authorities (e.g. ROLE_USER, ROLE_RETAILER, ROLE_ADMIN) to users at registration
+. Endpoints are secured via @PreAuthorize or HttpSecurity rules, e.g. .requestMatchers("/admin/**").hasRole("ADMIN")
+. Retailer-only endpoints (adding products) require ROLE_RETAILER, etc. This ensures each feature is accessible only to the appropriate roles. Password Storage: User passwords are never stored in plaintext. We use Spring Security’s BCryptPasswordEncoder (an adaptive one-way hash) to hash/salt passwords
+. Spring’s docs recommend bcrypt or similar adaptive functions for secure password hashing
+. JWT Tokens: Upon successful login, the Auth Service issues a signed JWT containing user info and roles (with an expiry claim). This token is included in each API request. On each request, the API validates the JWT’s signature and expiration (using the shared secret or key pair). The token’s payload carries the user’s ID and roles, so the server can enforce permissions without state
+. Using JWT makes the APIs stateless: “the server doesn’t store session info – each request carries what’s needed”
+. CORS & CSRF: Since the Angular app may run on a different origin (e.g. localhost:4200 vs API on :8080), we enable CORS in Spring Security (http.cors()) and configure allowed origins/headers
+. In a stateless JWT setup, CSRF protection is not needed (and is disabled)
+, because no cookies/sessions are used. We secure APIs via tokens and HTTPS. Additional considerations: all data in transit is protected by HTTPS. Sensitive data at rest (e.g. payment info) should be encrypted in the database. We will also use Spring Actuator endpoints (health, metrics) secured for monitoring.
+7. Frontend Overview
+The Angular app is organized into feature modules with routing. As Angular’s guide notes, “most apps have many feature modules, each a cohesive block of code dedicated to an application domain or workflow”
+. Suggested modules include: AuthModule (login/register/forgot), ProductModule (product listing, details, search), CartModule, WishlistModule, OrderModule (checkout), and AdminModule/RetailerModule for dashboards. A shared CoreModule can hold singleton services (e.g. AuthService) and components (e.g. navbar), and a SharedModule for common UI components. Routing: The AppRoutingModule defines routes such as /home, /login, /register, /products, /products/compare, /wishlist, /cart, /checkout, /profile, /retailer-dashboard, /admin-dashboard, etc. Route guards check authentication and roles (e.g. a canActivate guard ensures only admins access /admin-dashboard). Pages & Components: Key pages and their components include:
+Home: lists categories and featured products, with a search bar and breadcrumb navigation (as per case study emphasis on navigation aid).
+Login/Register: forms built with reactive forms, minimal fields per spec.
+Product List/Search: displays products in grid or list, allows filtering (by price, brand) and sorting (by name or price). Infinite scroll or pagination loads more products dynamically. Hovering a product shows a magnified preview. “Add to Wishlist” and “Add to Compare” buttons are available on each card.
+Compare Page: up to 4 selected products side-by-side in a table for feature comparison.
+Wishlist: shows user’s wishlisted items, with “Remove” or “Move to Cart” actions.
+Cart: lists items added to cart. Users can update quantity (with plus/minus buttons, auto-updating totals) or remove items. A “Proceed to Checkout” button leads to the checkout flow.
+Checkout: collects shipping and payment details and submits the order.
+Profile: displays user details and their wishlist/orders (case study mentions the profile shows wishlist and user info). Users can update their info.
+Retailer Dashboard: a separate view (for ROLE_RETAILER) showing the retailer’s product catalog, stock levels, and sales/revenue stats. It includes forms to add or edit products.
+Admin Dashboard: (ROLE_ADMIN) shows all retailers and products. Admin can approve retailer changes and manage categories or users.
+The Angular app uses services (e.g. AuthService, ProductService, CartService, etc.) to call the backend APIs over HTTP. JWT tokens are stored (e.g. in localStorage) and attached to requests. Components are kept lean with UI logic, delegating data operations to services. The app is responsive (mobile-first CSS).
+8. User Workflow Descriptions
+Signup: A new user fills name, email, password, address, etc. The password is sent to the server and hashed before saving. Upon success, the user is prompted to log in.
+Login: The user enters email/password. On success, the server returns a JWT token (with roles). The client stores this token (e.g. localStorage) and uses it for subsequent requests
+. If login fails, an error message is shown.
+Forgot Password (OTP): If login fails, the user clicks “Forgot Password”. They enter their email; the server generates and emails a one-time OTP. The user submits the OTP and a new password. The server verifies the OTP and, if valid, updates the password (encrypted).
+Browsing/Shopping: Unauthenticated visitors can browse products and use search/filter, but “Add to Cart” and “Checkout” prompt a login/signup. Authenticated users can add items to their Wishlist or Cart. They can compare up to 4 products.
+Wishlist: Clicking “Add to Wishlist” sends a request to the backend; the item appears in the user’s wishlist page. From there they can remove it or move it to the cart.
+Compare: Clicking “Add to Compare” adds a product to the compare list (up to 4). Visiting the Compare page shows selected products’ specs side-by-side. The user can remove items from comparison as needed.
+Cart & Checkout: Users add products to their cart (from product or wishlist). In the Cart page, they adjust quantities (plus/minus) and see updated totals. Clicking “Checkout” collects shipping/payment info and submits the order. The backend creates an Order with line items, reduces stock, and returns order confirmation.
+Orders: After checkout, users can view their Order history under Profile or Orders page.
+Retailer Actions: A retailer logs into the Retailer Dashboard to add new products or update stock/prices. They can view sales metrics and total revenue. When a retailer updates a product, the update is flagged for admin approval (optional workflow).
+Admin Actions: An admin logs into the Admin Dashboard to manage retailers and content. Admins can add/remove retailers, view all products, and must approve any retailer’s product changes before they go live (ensuring compliance). Admins also can manage categories and view platform-wide statistics.
+Each of these workflows is backed by the REST APIs; the frontend routing and UI flows correspond to the API calls outlined above.
+9. Testing & Tools
+Backend Testing: We will write unit tests (JUnit5 + Mockito) for service and repository layers, and integration tests using Spring Boot’s testing support
+. Spring Boot’s @SpringBootTest along with an in-memory H2 database allows end-to-end tests of the REST controllers and JPA layers
+. We separate fast unit tests (mocking dependencies) from slower integration tests (@SpringBootTest) so the CI pipeline can run them accordingly. Maven Surefire/Jacoco will track test coverage.
+Frontend Testing: Use Angular’s default Karma/Jasmine stack (or Vitest in Angular 21) for unit tests of components and services. The Angular CLI setup generates spec files for components and services. According to the Angular team, Vitest is now the default test runner (stable as of v21)
+, but Jasmine/Karma remain common. End-to-end (E2E) tests can use Protractor or Cypress (for critical user flows like login, add-to-cart, checkout).
+API Testing: Postman collections will document and manually test all endpoints (including negative tests). We can automate API smoke tests with Newman or similar. Swagger/OpenAPI documentation (Springdoc) provides an interactive API UI for exploratory testing
+.
+Other Tools: Database changes use Flyway/Liquibase. Code quality via SonarQube. Continuous Integration runs mvn test and npm test on code check-ins.
+10. Deployment Notes
+Local Setup: Developers should clone the backend and frontend repos. For the backend, configure application.properties (e.g. DB credentials). Run the Spring Boot app (via mvn spring-boot:run or IDE). For Angular, install Node.js, run npm install, then ng serve. Use separate dev environment variables (e.g. application-dev.properties) for localhost. Environments: We assume dev, staging, and production environments. Each has separate databases and configurations (use Spring profiles or environment vars). For example, the staging DB might be on AWS RDS, production on another instance. Environment-specific settings (API URLs, credentials) are injected at runtime. Docker/Containers: Each service includes a Dockerfile (preferably multi-stage to minimize image size). For example, build the Spring Boot JAR in one stage and use a slim JRE image in the final stage. We recommend spring-boot:build-image or custom Dockerfiles with FROM eclipse-temurin:17-jdk-alpine for the builder and FROM eclipse-temurin:17-jre-alpine for runtime. The Angular app can be built (ng build) and its static files served by Nginx in a container. We provide a docker-compose.yml for local multi-container setup (API Gateway, each microservice, and a MySQL container). In production, use a container orchestration platform (Kubernetes or ECS) with proper service discovery and load balancing. CI/CD: Set up pipelines (Jenkins/GitHub Actions) triggered on code push. Pipeline steps: check out code, run unit/integration tests, build artifacts, build Docker images, push to a registry. For example, tag images with the commit or version. Deploy images to staging automatically (after passing tests). Deploy to production on manual approval or on merges to main branch. We recommend infrastructure-as-code (Terraform/CloudFormation) to provision environments and configure secrets (e.g. JWT signing key, DB passwords stored securely, not hard-coded). Swagger UI: In Dev and Staging, the API docs are available (e.g. /swagger-ui.html) via Springdoc. This helps developers test endpoints live. Notes:
+The architecture assumes high availability and scalability: services are stateless, so they can scale out. Databases should be configured with read replicas as needed.
+We assume third-party services (e.g. SMTP for sending OTPs, payment gateway) will be integrated via separate service modules or within the Order service.
+All assumptions, such as limits on comparisons (max 4) and required signup for checkout, are per the case study specifications.
+This handover document provides the blueprint for Shopp-E’s development. It aligns the case study requirements with modern best practices (Spring Boot microservices, JWT auth, Angular 21, containerization) and should guide the teams in architecture, design, and implementation. Key design decisions (like using JWT and BCrypt) are backed by industry sources
+. All sections above should be fully addressed in the codebase, with attention to security, testing, and deployment as outlined.

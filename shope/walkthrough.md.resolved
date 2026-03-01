@@ -1,0 +1,40 @@
+# Shopp-E Platform Walkthrough
+
+## Overview
+We've successfully built the core foundation of the **Shopp-E** E-Commerce platform. The architecture is a **Modular Monolith** using **Spring Boot 3** for the backend and **Angular 21** for the frontend, operating connected via RESTful APIs. 
+
+Development was divided into Phase 1 & 2 for the Backend, and Phase 4 for the Frontend (Phase 3 Gateway was skipped due to the Monolith architecture).
+
+## 🚀 Backend (Spring Boot)
+The backend is organized into distinct, logically separated modules representing business domains:
+- **Auth Module:** JWT-based stateless authentication, handling Registration and Login via Spring Security.
+- **User Module:** Entity and API for User profiles.
+- **Retailer Module:** Stores retailer-specific profiles and dashboard data points (revenue, approval status).
+- **Product Module:** Handles catalogs, adding products, search, categorizations, and stock management.
+- **Order Module:** Advanced e-commerce interactions including:
+  - Shopping Cart
+  - Wishlists
+  - Product Comparison
+  - Final Checkout Flow
+- **Admin Module:** Centralized access to manage System Users and to approve or delete Retailer profiles.
+
+*Note: The MySQL connection was replaced with an In-Memory H2 Database structure for immediate local execution and testing.*
+
+## 🎨 Frontend (Angular 21)
+The frontend relies on the latest Angular standalone components and a clean, responsive layout:
+
+1. **Global App Frame:** Complete with Navigation bar supporting dynamic links corresponding to the authenticated User's Roles (Guest, Customer, Retailer, Admin).
+2. **Auth Flows:** Clean UI for Login and Registration.
+3. **Product Catalog:** A responsive grid mapping products, featuring search bars and detailed product spec views.
+4. **Order Flows:** Fully functional shopping cart with quantity modifications, leading to a robust Checkout form processing details.
+5. **Dashboards:**
+   - **Customer Profile:** Viewing current stats like order history counts.
+   - **Retailer Dashboard:** Viewing total revenue, approval status, and inventory tracking.
+   - **Admin Dashboard:** A structured administrative layout to list all users and approve new retailer applications.
+
+## ✅ Verification
+Both servers have been scaffolded and run locally.
+- Backend runs embedded Tomcat on **Port 8080**.
+- Frontend runs via Angular CLI on **Port 4200**.
+
+All APIs are protected by the custom `AuthInterceptor` on the frontend, securely injecting Bearer tokens into requests connecting to the backend's JWT filter chain.

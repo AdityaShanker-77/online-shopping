@@ -1,0 +1,23 @@
+<div class="auth-container">
+  <h2>Login to Shopp-E</h2>
+
+  <div *ngIf="errorMessage" class="error-banner">
+    {{ errorMessage }}
+  </div>
+
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input id="email" type="email" formControlName="email" class="form-control" />
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input id="password" type="password" formControlName="password" class="form-control" />
+    </div>
+
+    <button type="submit" [disabled]="!loginForm.valid" class="btn-3d btn-primary">Login</button>
+  </form>
+
+  <p class="mt-3">Don't have an account? <a routerLink="/auth/register">Register here</a></p>
+</div>

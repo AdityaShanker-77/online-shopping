@@ -1,0 +1,35 @@
+<nav class="navbar">
+    <div class="nav-brand">
+        <a routerLink="/">Shopp-E</a>
+    </div>
+    <div class="nav-links">
+        <div class="nav-links" *ngIf="!currentUser">
+            <button class="btn-3d btn-login" routerLink="/auth/login">Login</button>
+            <button class="btn-3d btn-primary" routerLink="/auth/register">Sign Up</button>
+        </div>
+
+        <div class="nav-links" *ngIf="currentUser">
+            <ng-container *ngIf="isCustomer">
+                <a routerLink="/products" class="nav-link" routerLinkActive="active">Products</a>
+                <a routerLink="/order/wishlist" class="nav-link" routerLinkActive="active">Wishlist</a>
+                <a routerLink="/order/cart" class="nav-link" routerLinkActive="active">Cart</a>
+            </ng-container>
+
+            <a routerLink="/profile" class="nav-link" routerLinkActive="active">Profile</a>
+
+            <ng-container *ngIf="isAdmin">
+                <a routerLink="/admin/dashboard" class="nav-link" routerLinkActive="active">Admin</a>
+            </ng-container>
+
+            <ng-container *ngIf="isRetailer">
+                <a routerLink="/retailer/dashboard" class="nav-link" routerLinkActive="active">Retailer Store</a>
+            </ng-container>
+
+            <button class="btn-3d btn-logout" (click)="logout()">Logout</button>
+        </div>
+    </div>
+</nav>
+
+<main class="main-content">
+    <router-outlet></router-outlet>
+</main>

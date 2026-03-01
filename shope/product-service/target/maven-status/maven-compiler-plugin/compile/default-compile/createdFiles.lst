@@ -1,0 +1,17 @@
+com\shoppe\product\controller\ProductController.class
+com\shoppe\product\controller\DataImportController.class
+com\shoppe\product\ProductServiceApplication.class
+com\shoppe\product\repository\ProductRepository.class
+com\shoppe\product\dto\FakeStoreProductDto.class
+com\shoppe\product\exception\ResourceNotFoundException.class
+com\shoppe\product\exception\GlobalExceptionHandler.class
+com\shoppe\product\service\DataImportService.class
+com\shoppe\product\dto\CategoryDto.class
+com\shoppe\product\dto\FakeStoreProductDto$Rating.class
+com\shoppe\product\controller\CategoryController.class
+com\shoppe\product\service\ProductService.class
+com\shoppe\product\model\Product.class
+com\shoppe\product\repository\CategoryRepository.class
+com\shoppe\product\dto\ProductDto.class
+com\shoppe\product\service\ProductServiceImpl.class
+com\shoppe\product\model\Category.class

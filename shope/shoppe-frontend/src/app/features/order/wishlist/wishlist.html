@@ -1,0 +1,33 @@
+<div class="wishlist-container">
+    <header class="page-header">
+        <h1>Your Wishlist</h1>
+        <p>Save your favorite premium items for later.</p>
+    </header>
+
+    <div class="loading-state" *ngIf="isLoading">
+        <p>Loading your wishlist...</p>
+    </div>
+
+    <div class="wishlist-grid" *ngIf="!isLoading && wishlistItems.length > 0">
+        <div class="product-card" *ngFor="let item of wishlistItems">
+            <div class="product-image-container">
+                <img [src]="item.imageUrl || 'assets/images/placeholder.png'" [alt]="item.name"
+                    onerror="this.src='https://via.placeholder.com/200?text=Product+Image'" />
+            </div>
+            <div class="product-info">
+                <span class="product-category">{{ item.categoryName || 'General' }}</span>
+                <h3 class="product-name" [title]="item.name">{{ item.name }}</h3>
+                <div class="product-price">${{ item.price }}</div>
+                <div class="product-actions">
+                    <button class="btn-3d btn-add" (click)="moveToCart(item.id)">Move to Cart</button>
+                    <button class="btn-3d btn-danger" (click)="removeFromWishlist(item.id)">Remove</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!isLoading && wishlistItems.length === 0">
+        <p>Your wishlist is currently empty.</p>
+        <button class="btn-3d btn-primary" routerLink="/products">Explore Products</button>
+    </div>
+</div>
