@@ -33,6 +33,7 @@ export class Login {
           this.router.navigate(['/']);
         },
         error: (err) => {
+          console.error('Login failed explicitly due to:', err);
           this.errorMessage = 'Invalid email or password';
         }
       });

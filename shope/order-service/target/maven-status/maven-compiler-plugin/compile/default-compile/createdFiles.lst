@@ -6,6 +6,7 @@ com\shoppe\order\dto\ProductDto.class
 com\shoppe\order\model\Wishlist.class
 com\shoppe\order\repository\OrderRepository.class
 com\shoppe\order\model\OrderItem.class
+application.properties
 com\shoppe\order\repository\CartItemRepository.class
 com\shoppe\order\dto\OrderDto.class
 com\shoppe\order\controller\OrderController.class

@@ -60,9 +60,6 @@ public class AuthController {
         if (requestRole != null && requestRole.equalsIgnoreCase("RETAILER")) {
             roles.add(roleRepository.findByName(RoleName.ROLE_RETAILER)
                     .orElseThrow(() -> new RuntimeException("Error: Role not found.")));
-        } else if (requestRole != null && requestRole.equalsIgnoreCase("ADMIN")) {
-            roles.add(roleRepository.findByName(RoleName.ROLE_ADMIN)
-                    .orElseThrow(() -> new RuntimeException("Error: Role not found.")));
         } else {
             roles.add(roleRepository.findByName(RoleName.ROLE_USER)
                     .orElseThrow(() -> new RuntimeException("Error: Role not found.")));
