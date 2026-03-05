@@ -7,7 +7,7 @@
         <h2 class="text-3xl md:text-5xl font-black text-white mb-4 flex items-center justify-center gap-3">
             <lucide-icon name="shield-check" class="w-10 h-10 text-green-400"></lucide-icon> Secure Checkout
         </h2>
-        <p class="text-slate-400 text-lg">Complete your purchase safely and securely.</p>
+        <p class="text-slate-400 text-lg">Review your order and proceed to payment.</p>
     </header>
 
     <div *ngIf="error"
@@ -22,7 +22,7 @@
                 <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-8">
 
                     <!-- Shipping Section -->
-                    <div class="pb-8 border-b border-white/5">
+                    <div>
                         <div class="flex items-center gap-3 mb-6">
                             <div
                                 class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center border border-blue-500/30">
@@ -59,51 +59,33 @@
                         </div>
                     </div>
 
-                    <!-- Payment Section -->
-                    <div>
+                    <!-- Cart Items Preview -->
+                    <div class="pt-6 border-t border-white/5" *ngIf="cartItems.length > 0">
                         <div class="flex items-center gap-3 mb-6">
                             <div
                                 class="w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center border border-purple-500/30">
-                                <lucide-icon name="credit-card" class="w-5 h-5"></lucide-icon>
+                                <lucide-icon name="shopping-bag" class="w-5 h-5"></lucide-icon>
                             </div>
-                            <h3 class="text-xl font-bold text-white">Payment Details</h3>
+                            <h3 class="text-xl font-bold text-white">Order Items</h3>
                         </div>
 
-                        <div class="flex flex-col gap-6">
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-semibold text-slate-300 mb-2">Card
-                                        Information</label>
-                                    <div class="relative">
-                                        <!-- Real Stripe Element inserted here by TS -->
-                                        <div #cardInfo
-                                            class="w-full bg-slate-800 border-2 border-white/10 rounded-xl px-4 py-4 text-white placeholder-slate-400 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all outline-none backdrop-blur-sm min-h-[56px]">
-                                        </div>
-                                    </div>
+                        <div class="flex flex-col gap-3">
+                            <div *ngFor="let item of cartItems"
+                                class="flex items-center gap-4 p-3 bg-white/5 rounded-xl border border-white/5">
+                                <img [src]="item.imageUrl || 'assets/no-image.png'" [alt]="item.productName"
+                                    class="w-12 h-12 rounded-lg object-cover bg-white/10"
+                                    (error)="$any($event.target).src='assets/no-image.png'" />
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-white font-semibold truncate">{{ item.productName }}</p>
+                                    <p class="text-slate-400 text-sm">Qty: {{ item.quantity }} × ${{ item.price }}</p>
                                 </div>
-                            </div>
-                            <app-input id="cardNumber" formControlName="cardNumber" label="Card Number"
-                                placeholder="1234 5678 9101 1121" [value]="f['cardNumber'].value"
-                                (valueChange)="f['cardNumber'].setValue($event)"
-                                [error]="f['cardNumber'].touched && f['cardNumber'].invalid ? 'A valid 16-digit card number is required' : null">
-                            </app-input>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <app-input id="expiry" formControlName="expiry" label="Expiry Date (MM/YY)"
-                                    placeholder="e.g. 12/25" [value]="f['expiry'].value"
-                                    (valueChange)="f['expiry'].setValue($event)"
-                                    [error]="f['expiry'].touched && f['expiry'].invalid ? 'Valid expiry in MM/YY format is required' : null">
-                                </app-input>
-
-                                <app-input id="cvv" formControlName="cvv" label="CVV" placeholder="123"
-                                    [type]="'password'" [value]="f['cvv'].value"
-                                    (valueChange)="f['cvv'].setValue($event)"
-                                    [error]="f['cvv'].touched && f['cvv'].invalid ? 'Valid 3 or 4 digit CVV is required' : null">
-                                </app-input>
+                                <span class="text-white font-bold whitespace-nowrap">${{ item.price * item.quantity
+                                    }}</span>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Submit Button -->
                     <div class="pt-4 mt-2 border-t border-white/5 flex flex-col items-end">
                         <app-button type="submit" [variant]="'primary'"
                             [disabled]="checkoutForm.invalid || loading || cartTotal === 0" size="lg"
@@ -118,8 +100,8 @@
                                         </path>
                                     </svg>
                                 </span>
-                                <lucide-icon *ngIf="!loading" name="check-circle-2" class="w-5 h-5"></lucide-icon>
-                                {{ loading ? 'Processing...' : 'Place Order' }}
+                                <lucide-icon *ngIf="!loading" name="external-link" class="w-5 h-5"></lucide-icon>
+                                {{ loading ? 'Redirecting to Stripe...' : 'Proceed to Payment' }}
                             </span>
                         </app-button>
                     </div>
@@ -136,30 +118,26 @@
 
                 <div class="flex flex-col gap-4 mb-6">
                     <div class="flex justify-between items-center text-slate-300">
-                        <span>Items Total</span>
-                        <span class="font-bold text-white">${{ cartTotal }}</span>
+                        <span>Items ({{ cartItems.length }})</span>
+                        <span class="font-bold text-white">${{ cartTotal.toFixed(2) }}</span>
                     </div>
                     <div class="flex justify-between items-center text-slate-300">
                         <span>Shipping</span>
                         <span class="text-green-400 font-bold">Free</span>
                     </div>
-                    <div class="flex justify-between items-center text-slate-300">
-                        <span>Est. Taxes</span>
-                        <span class="font-bold text-white">$0.00</span>
-                    </div>
                     <div class="pt-4 mt-2 border-t border-white/10 flex justify-between items-end">
                         <span class="text-lg font-bold text-slate-400">Total to Pay</span>
                         <span
                             class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">${{
-                            cartTotal }}</span>
+                            cartTotal.toFixed(2) }}</span>
                     </div>
                 </div>
 
                 <div
                     class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-sm text-blue-200 mt-6 flex gap-3">
                     <lucide-icon name="shield-check" class="w-5 h-5 shrink-0 text-blue-400 mt-0.5"></lucide-icon>
-                    <p>By placing your order, you agree to our privacy notice and conditions of use. Payment is secure
-                        and encrypted.</p>
+                    <p>You will be redirected to Stripe's secure checkout page to complete your payment. Your card
+                        details are handled entirely by Stripe.</p>
                 </div>
             </app-card>
         </div>

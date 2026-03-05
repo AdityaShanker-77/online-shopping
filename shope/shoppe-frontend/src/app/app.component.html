@@ -1,11 +1,11 @@
-<div *ngIf="isLoading" class="fixed top-0 left-0 w-full h-1 z-50 overflow-hidden bg-slate-800">
+<div *ngIf="isLoading" class="fixed top-0 left-0 w-full h-1 z-[60] overflow-hidden bg-slate-800">
     <div
         class="h-full bg-gradient-to-r from-blue-500 via-pink-500 to-purple-500 animate-[loadingBar_1.5s_infinite_linear] origin-left w-1/2">
     </div>
 </div>
 
 <nav
-    class="sticky top-0 z-40 w-full backdrop-blur-xl bg-slate-900/80 border-b border-white/10 shadow-lg px-6 py-4 transition-all">
+    class="fixed top-0 left-0 right-0 z-50 w-full backdrop-blur-xl bg-slate-900/80 border-b border-white/10 shadow-lg px-6 py-4 transition-all">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center gap-8">
             <a routerLink="/"
@@ -74,6 +74,9 @@
     </div>
 </nav>
 
+<!-- Spacer for fixed navbar -->
+<div class="h-[72px]"></div>
+
 <!-- Main Global Loading Overlay -->
 <div *ngIf="isLoading"
     class="fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center transition-all duration-300 animate-in fade-in">
@@ -89,7 +92,143 @@
     </div>
 </div>
 
-<main class="main-content">
+<main class="main-content min-h-[calc(100vh-72px-300px)]">
     <app-toast></app-toast>
     <router-outlet></router-outlet>
 </main>
+
+<!-- Footer -->
+<footer class="relative bg-slate-950 border-t border-white/5 pt-16 pb-8 overflow-hidden">
+    <!-- Decorative blobs -->
+    <div class="absolute top-0 left-1/4 w-96 h-64 bg-blue-500/5 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-0 right-1/4 w-80 h-48 bg-purple-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-6 relative z-10">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            <!-- Brand -->
+            <div class="md:col-span-1">
+                <a routerLink="/"
+                    class="text-2xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-500 bg-clip-text text-transparent inline-block mb-4">
+                    Shopp-E
+                </a>
+                <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                    Your premium destination for quality products. Fast shipping, secure payments, and exceptional
+                    customer service.
+                </p>
+                <div class="flex items-center gap-3">
+                    <a href="#"
+                        class="w-9 h-9 bg-white/5 hover:bg-blue-500/20 border border-white/10 hover:border-blue-500/30 rounded-lg flex items-center justify-center text-slate-400 hover:text-blue-400 transition-all">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z">
+                            </path>
+                        </svg>
+                    </a>
+                    <a href="#"
+                        class="w-9 h-9 bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500/30 rounded-lg flex items-center justify-center text-slate-400 hover:text-pink-400 transition-all">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z">
+                            </path>
+                        </svg>
+                    </a>
+                    <a href="#"
+                        class="w-9 h-9 bg-white/5 hover:bg-blue-600/20 border border-white/10 hover:border-blue-600/30 rounded-lg flex items-center justify-center text-slate-400 hover:text-blue-500 transition-all">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z">
+                            </path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Shop -->
+            <div>
+                <h4 class="text-white font-bold text-sm uppercase tracking-widest mb-5">Shop</h4>
+                <ul class="flex flex-col gap-3">
+                    <li><a routerLink="/products"
+                            class="text-slate-400 hover:text-white text-sm transition-colors hover:translate-x-1 inline-block">All
+                            Products</a></li>
+                    <li><a routerLink="/order/cart"
+                            class="text-slate-400 hover:text-white text-sm transition-colors hover:translate-x-1 inline-block">My
+                            Cart</a></li>
+                    <li><a routerLink="/order/wishlist"
+                            class="text-slate-400 hover:text-white text-sm transition-colors hover:translate-x-1 inline-block">Wishlist</a>
+                    </li>
+                    <li><a routerLink="/order/compare"
+                            class="text-slate-400 hover:text-white text-sm transition-colors hover:translate-x-1 inline-block">Compare</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Account -->
+            <div>
+                <h4 class="text-white font-bold text-sm uppercase tracking-widest mb-5">Account</h4>
+                <ul class="flex flex-col gap-3">
+                    <li><a routerLink="/profile"
+                            class="text-slate-400 hover:text-white text-sm transition-colors hover:translate-x-1 inline-block">My
+                            Profile</a></li>
+                    <li><a routerLink="/profile"
+                            class="text-slate-400 hover:text-white text-sm transition-colors hover:translate-x-1 inline-block">My
+                            Orders</a></li>
+                    <li><a routerLink="/auth/login"
+                            class="text-slate-400 hover:text-white text-sm transition-colors hover:translate-x-1 inline-block">Login</a>
+                    </li>
+                    <li><a routerLink="/auth/register"
+                            class="text-slate-400 hover:text-white text-sm transition-colors hover:translate-x-1 inline-block">Register</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Support -->
+            <div>
+                <h4 class="text-white font-bold text-sm uppercase tracking-widest mb-5">Support</h4>
+                <ul class="flex flex-col gap-3">
+                    <li><a href="#"
+                            class="text-slate-400 hover:text-white text-sm transition-colors hover:translate-x-1 inline-block">Help
+                            Center</a></li>
+                    <li><a href="#"
+                            class="text-slate-400 hover:text-white text-sm transition-colors hover:translate-x-1 inline-block">Shipping
+                            & Returns</a></li>
+                    <li><a href="#"
+                            class="text-slate-400 hover:text-white text-sm transition-colors hover:translate-x-1 inline-block">Privacy
+                            Policy</a></li>
+                    <li><a href="#"
+                            class="text-slate-400 hover:text-white text-sm transition-colors hover:translate-x-1 inline-block">Terms
+                            of Service</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Payment & trust badges -->
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6 py-6 border-t border-white/5 mb-6">
+            <div class="flex items-center gap-3 text-slate-500 text-sm">
+                <lucide-icon name="shield-check" class="w-4 h-4 text-green-400"></lucide-icon>
+                <span>Secure payments powered by Stripe</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div
+                    class="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-slate-400 tracking-wider">
+                    VISA</div>
+                <div
+                    class="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-slate-400 tracking-wider">
+                    MASTERCARD</div>
+                <div
+                    class="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-slate-400 tracking-wider">
+                    AMEX</div>
+                <div
+                    class="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-slate-400 tracking-wider">
+                    STRIPE</div>
+            </div>
+        </div>
+
+        <!-- Bottom bar -->
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
+            <p>&copy; 2026 Shopp-E. All rights reserved.</p>
+            <p class="text-slate-600">Crafted with
+                <span class="text-pink-500">&hearts;</span> for a premium shopping experience
+            </p>
+        </div>
+    </div>
+</footer>

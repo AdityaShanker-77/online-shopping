@@ -4,12 +4,16 @@ import com.shoppe.order.client.ProductServiceClient;
 import com.shoppe.order.dto.*;
 import com.shoppe.order.model.*;
 import com.shoppe.order.repository.*;
+import com.stripe.Stripe;
+import com.stripe.model.checkout.Session;
+import com.stripe.param.checkout.SessionCreateParams;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,6 +30,9 @@ public class OrderService {
 
     @Value("${stripe.secret.key}")
     private String stripeSecretKey;
+
+    @Value("${shoppe.frontend.url:http://localhost:4200}")
+    private String frontendUrl;
 
     // ─── Cart ────────────────────────────────────────────
 
@@ -141,25 +148,69 @@ public class OrderService {
         compareItemRepository.findByUserIdAndProductId(userId, productId).ifPresent(compareItemRepository::delete);
     }
 
-    // ─── Checkout ─────────────────────────────────────────
+    // ─── Stripe Checkout Session ──────────────────────────
 
-    public PaymentIntentResponse createPaymentIntent(Long userId, BigDecimal totalAmount) {
+    public CheckoutSessionResponse createCheckoutSession(Long userId, String shippingAddress) {
         try {
-            com.stripe.Stripe.apiKey = this.stripeSecretKey;
+            Stripe.apiKey = this.stripeSecretKey;
 
-            // Amount is in cents
-            Long amountInCents = totalAmount.multiply(BigDecimal.valueOf(100)).longValue();
+            List<CartItem> cartItems = cartItemRepository.findByUserId(userId);
+            if (cartItems.isEmpty()) {
+                throw new RuntimeException("Cart is empty");
+            }
 
-            com.stripe.param.PaymentIntentCreateParams params = com.stripe.param.PaymentIntentCreateParams.builder()
-                    .setAmount(amountInCents)
-                    .setCurrency("usd")
+            List<SessionCreateParams.LineItem> lineItems = new ArrayList<>();
+            for (CartItem item : cartItems) {
+                long unitAmountInCents = item.getPrice().multiply(BigDecimal.valueOf(100)).longValue();
+                lineItems.add(
+                        SessionCreateParams.LineItem.builder()
+                                .setQuantity((long) item.getQuantity())
+                                .setPriceData(
+                                        SessionCreateParams.LineItem.PriceData.builder()
+                                                .setCurrency("usd")
+                                                .setUnitAmount(unitAmountInCents)
+                                                .setProductData(
+                                                        SessionCreateParams.LineItem.PriceData.ProductData.builder()
+                                                                .setName(item.getProductName())
+                                                                .build())
+                                                .build())
+                                .build());
+            }
+
+            SessionCreateParams params = SessionCreateParams.builder()
+                    .setMode(SessionCreateParams.Mode.PAYMENT)
+                    .setSuccessUrl(frontendUrl + "/order/checkout-success?session_id={CHECKOUT_SESSION_ID}")
+                    .setCancelUrl(frontendUrl + "/order/cart")
+                    .addAllLineItem(lineItems)
+                    .putMetadata("userId", userId.toString())
+                    .putMetadata("shippingAddress", shippingAddress)
                     .build();
 
-            com.stripe.model.PaymentIntent intent = com.stripe.model.PaymentIntent.create(params);
-
-            return new PaymentIntentResponse(intent.getClientSecret());
+            Session session = Session.create(params);
+            return new CheckoutSessionResponse(session.getUrl());
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to generate payment intent", e);
+            throw new RuntimeException("Failed to create Stripe Checkout Session", e);
+        }
+    }
+
+    @Transactional
+    public OrderDto confirmCheckoutSession(String sessionId, Long userId) {
+        try {
+            Stripe.apiKey = this.stripeSecretKey;
+            Session session = Session.retrieve(sessionId);
+
+            if (!"paid".equals(session.getPaymentStatus())) {
+                throw new RuntimeException("Payment not completed");
+            }
+
+            String shippingAddress = session.getMetadata().getOrDefault("shippingAddress", "");
+            return checkout(userId, shippingAddress);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to confirm checkout session", e);
         }
     }
 
@@ -177,12 +228,19 @@ public class OrderService {
 
         for (CartItem item : cartItems) {
             ProductDto product = productServiceClient.getProductById(item.getProductId());
-            if (product.getStock() < item.getQuantity()) {
-                throw new RuntimeException("Insufficient stock for: " + product.getName());
+
+            // Deduct stock via Feign — best-effort for products not in local DB (e.g.
+            // FakeStore)
+            try {
+                if (product.getStock() < item.getQuantity()) {
+                    throw new RuntimeException("Insufficient stock for: " + product.getName());
+                }
+                product.setStock(product.getStock() - item.getQuantity());
+                productServiceClient.updateProduct(product.getId(), product);
+            } catch (feign.FeignException.NotFound e) {
+                // Product exists via FakeStore fallback but not in local DB — skip stock
+                // deduction
             }
-            // Deduct stock via Feign
-            product.setStock(product.getStock() - item.getQuantity());
-            productServiceClient.updateProduct(product.getId(), product);
 
             OrderItem oi = new OrderItem();
             oi.setOrder(order);

@@ -55,13 +55,13 @@ export class OrderService {
         return this.http.delete(`${this.apiUrl}/compare/${productId}`);
     }
 
-    // Checkout
-    createPaymentIntent(amount: number): Observable<{ clientSecret: string }> {
-        return this.http.post<{ clientSecret: string }>(`${this.apiUrl}/orders/payment-intent`, { amount });
+    // Stripe Checkout
+    createCheckoutSession(shippingAddress: string): Observable<{ url: string }> {
+        return this.http.post<{ url: string }>(`${this.apiUrl}/orders/create-checkout-session`, { shippingAddress });
     }
 
-    checkout(shippingAddress: string): Observable<Order> {
-        return this.http.post<Order>(`${this.apiUrl}/orders/checkout`, { shippingAddress });
+    confirmCheckout(sessionId: string): Observable<Order> {
+        return this.http.post<Order>(`${this.apiUrl}/orders/confirm-checkout?session_id=${sessionId}`, {});
     }
 
     // Orders

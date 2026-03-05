@@ -30,47 +30,72 @@
         </app-button>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 relative z-10"
-        *ngIf="products.length > 0; else noProducts">
-        <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col group transform-gpu will-change-transform"
-            *ngFor="let product of products">
+    <div *ngIf="products.length > 0; else noProducts" class="relative z-10 w-full">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col group transform-gpu will-change-transform"
+                *ngFor="let product of pagedProducts">
 
-            <div class="h-64 overflow-hidden relative bg-white/5 flex items-center justify-center p-4">
-                <button
-                    class="absolute top-4 right-4 z-20 w-10 h-10 bg-black/20 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center text-slate-400 hover:text-pink-500 hover:bg-white/10 transition-all cursor-pointer group/heart shadow-lg"
-                    (click)="addToWishlist(product, $event)" title="Add to Wishlist">
-                    <lucide-icon name="heart"
-                        class="w-5 h-5 transition-transform group-active/heart:scale-75"></lucide-icon>
-                </button>
-                <img [src]="getProxiedImageUrl(product.imageUrl)" [alt]="product.name" loading="lazy"
-                    class="max-w-full max-h-full object-cover drop-shadow-2xl group-hover:scale-105 transition-transform duration-500 rounded-xl"
-                    (error)="$any($event.target).src='assets/no-image.png'" />
-            </div>
+                <div class="h-64 overflow-hidden relative bg-white/5 flex items-center justify-center p-4">
+                    <button
+                        class="absolute top-4 right-4 z-20 w-10 h-10 bg-black/20 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center text-slate-400 hover:text-pink-500 hover:bg-white/10 transition-all cursor-pointer group/heart shadow-lg"
+                        (click)="addToWishlist(product, $event)" title="Add to Wishlist">
+                        <lucide-icon name="heart"
+                            class="w-5 h-5 transition-transform group-active/heart:scale-75"></lucide-icon>
+                    </button>
+                    <img [src]="getProxiedImageUrl(product.imageUrl)" [alt]="product.name" loading="lazy"
+                        class="max-w-full max-h-full object-cover drop-shadow-2xl group-hover:scale-105 transition-transform duration-500 rounded-xl"
+                        (error)="$any($event.target).src='assets/no-image.png'" />
+                </div>
 
-            <div class="p-5 flex flex-col flex-1">
-                <span class="text-xs font-bold text-pink-400 uppercase tracking-wider mb-2">{{ product.categoryName ||
-                    'General' }}</span>
-                <h3 class="text-lg font-bold text-white mb-2 leading-tight truncate" [title]="product.name">{{
-                    product.name }}</h3>
-                <div class="text-2xl font-black text-white mb-6">${{ product.price }}</div>
+                <div class="p-5 flex flex-col flex-1">
+                    <span class="text-xs font-bold text-pink-400 uppercase tracking-wider mb-2">{{ product.categoryName
+                        ||
+                        'General' }}</span>
+                    <h3 class="text-lg font-bold text-white mb-2 leading-tight truncate" [title]="product.name">{{
+                        product.name }}</h3>
+                    <div class="text-2xl font-black text-white mb-6">${{ product.price }}</div>
 
-                <div class="mt-auto flex flex-col gap-3">
-                    <div class="flex gap-3">
-                        <app-button variant="primary" size="full" (onClick)="addToCart(product, $event)" class="flex-1">
-                            <lucide-icon name="shopping-cart" class="w-4 h-4"></lucide-icon> Cart
+                    <div class="mt-auto flex flex-col gap-3">
+                        <div class="flex gap-3">
+                            <app-button variant="primary" size="full" (onClick)="addToCart(product, $event)"
+                                class="flex-1">
+                                <lucide-icon name="shopping-cart" class="w-4 h-4"></lucide-icon> Cart
+                            </app-button>
+
+                            <a [routerLink]="['/products', product.id]"
+                                class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl shadow border border-slate-700 hover:border-slate-600 transition-all font-bold text-base text-center decoration-transparent gap-2">
+                                <lucide-icon name="search" class="w-4 h-4"></lucide-icon> View
+                            </a>
+                        </div>
+
+                        <app-button variant="outline" size="full" (onClick)="addToCompare(product, $event)">
+                            <lucide-icon name="arrow-left-right" class="w-4 h-4"></lucide-icon> Compare
                         </app-button>
-
-                        <a [routerLink]="['/products', product.id]"
-                            class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl shadow border border-slate-700 hover:border-slate-600 transition-all font-bold text-base text-center decoration-transparent gap-2">
-                            <lucide-icon name="search" class="w-4 h-4"></lucide-icon> View
-                        </a>
                     </div>
-
-                    <app-button variant="outline" size="full" (onClick)="addToCompare(product, $event)">
-                        <lucide-icon name="arrow-left-right" class="w-4 h-4"></lucide-icon> Compare
-                    </app-button>
                 </div>
             </div>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="flex flex-wrap justify-center items-center gap-2 mt-12 mb-8" *ngIf="totalPages > 1">
+            <button
+                class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                [disabled]="currentPage === 1" (click)="prevPage()">
+                <lucide-icon name="chevron-left" class="w-5 h-5"></lucide-icon>
+            </button>
+
+            <button *ngFor="let page of getPagesArray()"
+                class="w-10 h-10 rounded-xl border flex items-center justify-center font-bold transition-colors"
+                [ngClass]="currentPage === page ? 'bg-blue-500 text-white border-blue-400' : 'bg-white/5 border-white/10 text-slate-400 hover:text-white hover:bg-white/10'"
+                (click)="goToPage(page)">
+                {{ page }}
+            </button>
+
+            <button
+                class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                [disabled]="currentPage === totalPages" (click)="nextPage()">
+                <lucide-icon name="chevron-right" class="w-5 h-5"></lucide-icon>
+            </button>
         </div>
     </div>
 

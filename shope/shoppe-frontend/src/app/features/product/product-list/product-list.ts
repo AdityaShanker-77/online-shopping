@@ -9,7 +9,7 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { ToastService } from '../../../shared/services/toast.service';
-import { LucideAngularModule, Heart, ShoppingCart, ArrowLeftRight, Search } from 'lucide-angular';
+import { LucideAngularModule, Heart, ShoppingCart, ArrowLeftRight, Search, ChevronLeft, ChevronRight } from 'lucide-angular';
 
 @Component({
   selector: 'app-product-list',
@@ -20,9 +20,14 @@ import { LucideAngularModule, Heart, ShoppingCart, ArrowLeftRight, Search } from
 })
 export class ProductList implements OnInit {
   products: Product[] = [];
+  pagedProducts: Product[] = [];
   categories: any[] = [];
   searchKeyword: string = '';
   selectedCategoryId: string | number | undefined = undefined;
+
+  currentPage: number = 1;
+  pageSize: number = 10;
+  totalPages: number = 0;
 
   constructor(
     private productService: ProductService,
@@ -46,11 +51,50 @@ export class ProductList implements OnInit {
     this.productService.getProducts(this.selectedCategoryId, this.searchKeyword).subscribe({
       next: (data) => {
         this.products = data;
+        this.currentPage = 1;
+        this.updatePagination();
       },
       error: (err) => {
         this.toastService.error('Failed to load products');
       }
     });
+  }
+
+  updatePagination() {
+    this.totalPages = Math.ceil(this.products.length / this.pageSize);
+    if (this.totalPages === 0) {
+      this.totalPages = 1;
+    }
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    this.pagedProducts = this.products.slice(startIndex, startIndex + this.pageSize);
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePagination();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  getPagesArray(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
 
   onSearch() {

@@ -62,6 +62,6 @@ export class Cart implements OnInit {
     }
 
     get totalAmount(): number {
-        return this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        return Math.round(this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0) * 100) / 100;
     }
 }

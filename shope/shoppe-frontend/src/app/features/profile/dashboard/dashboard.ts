@@ -8,6 +8,8 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { ToastService } from '../../../shared/services/toast.service';
+import { OrderService } from '../../order/services/order.service';
+import { Order } from '../../order/models/order';
 import { LucideAngularModule, User, Mail, Phone, MapPin, Shield, Camera, Edit2, Check, X, ShoppingBag, Heart, ArrowLeftRight } from 'lucide-angular';
 
 @Component({
@@ -24,11 +26,13 @@ export class ProfileDashboard implements OnInit {
     editing = false;
     message = '';
     uploadMessage = '';
+    orders: Order[] = [];
 
     @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
     constructor(
         private profileService: ProfileService,
+        private orderService: OrderService,
         private fb: FormBuilder,
         private toastService: ToastService
     ) {
@@ -44,6 +48,14 @@ export class ProfileDashboard implements OnInit {
 
     ngOnInit() {
         this.loadProfile();
+        this.loadOrders();
+    }
+
+    loadOrders() {
+        this.orderService.getOrders().subscribe({
+            next: (orders) => this.orders = orders,
+            error: () => { /* silently fail */ }
+        });
     }
 
     loadProfile() {
