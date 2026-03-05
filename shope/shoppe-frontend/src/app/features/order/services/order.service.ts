@@ -56,6 +56,10 @@ export class OrderService {
     }
 
     // Checkout
+    createPaymentIntent(amount: number): Observable<{ clientSecret: string }> {
+        return this.http.post<{ clientSecret: string }>(`${this.apiUrl}/orders/payment-intent`, { amount });
+    }
+
     checkout(shippingAddress: string): Observable<Order> {
         return this.http.post<Order>(`${this.apiUrl}/orders/checkout`, { shippingAddress });
     }

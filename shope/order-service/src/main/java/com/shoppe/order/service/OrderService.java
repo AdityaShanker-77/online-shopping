@@ -5,6 +5,7 @@ import com.shoppe.order.dto.*;
 import com.shoppe.order.model.*;
 import com.shoppe.order.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,9 @@ public class OrderService {
     private final CompareItemRepository compareItemRepository;
     private final OrderRepository orderRepository;
     private final ProductServiceClient productServiceClient;
+
+    @Value("${stripe.secret.key}")
+    private String stripeSecretKey;
 
     // ─── Cart ────────────────────────────────────────────
 
@@ -138,6 +142,26 @@ public class OrderService {
     }
 
     // ─── Checkout ─────────────────────────────────────────
+
+    public PaymentIntentResponse createPaymentIntent(Long userId, BigDecimal totalAmount) {
+        try {
+            com.stripe.Stripe.apiKey = this.stripeSecretKey;
+
+            // Amount is in cents
+            Long amountInCents = totalAmount.multiply(BigDecimal.valueOf(100)).longValue();
+
+            com.stripe.param.PaymentIntentCreateParams params = com.stripe.param.PaymentIntentCreateParams.builder()
+                    .setAmount(amountInCents)
+                    .setCurrency("usd")
+                    .build();
+
+            com.stripe.model.PaymentIntent intent = com.stripe.model.PaymentIntent.create(params);
+
+            return new PaymentIntentResponse(intent.getClientSecret());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate payment intent", e);
+        }
+    }
 
     @Transactional
     public OrderDto checkout(Long userId, String shippingAddress) {

@@ -70,6 +70,18 @@
                         </div>
 
                         <div class="flex flex-col gap-6">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-300 mb-2">Card
+                                        Information</label>
+                                    <div class="relative">
+                                        <!-- Real Stripe Element inserted here by TS -->
+                                        <div #cardInfo
+                                            class="w-full bg-slate-800 border-2 border-white/10 rounded-xl px-4 py-4 text-white placeholder-slate-400 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all outline-none backdrop-blur-sm min-h-[56px]">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <app-input id="cardNumber" formControlName="cardNumber" label="Card Number"
                                 placeholder="1234 5678 9101 1121" [value]="f['cardNumber'].value"
                                 (valueChange)="f['cardNumber'].setValue($event)"

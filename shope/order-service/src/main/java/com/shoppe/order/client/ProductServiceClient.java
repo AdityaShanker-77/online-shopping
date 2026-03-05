@@ -3,7 +3,6 @@ package com.shoppe.order.client;
 import com.shoppe.order.dto.ProductDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @FeignClient(name = "product-service")
 public interface ProductServiceClient {

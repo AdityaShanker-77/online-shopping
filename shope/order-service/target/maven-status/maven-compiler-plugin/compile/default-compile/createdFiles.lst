@@ -1,3 +1,4 @@
+com\shoppe\order\model\CompareItem.class
 com\shoppe\order\model\CartItem.class
 com\shoppe\order\client\ProductServiceClient.class
 com\shoppe\order\OrderServiceApplication.class
@@ -6,10 +7,9 @@ com\shoppe\order\dto\ProductDto.class
 com\shoppe\order\model\Wishlist.class
 com\shoppe\order\repository\OrderRepository.class
 com\shoppe\order\model\OrderItem.class
-application.properties
 com\shoppe\order\repository\CartItemRepository.class
 com\shoppe\order\dto\OrderDto.class
-com\shoppe\order\controller\OrderController.class
+com\shoppe\order\repository\CompareItemRepository.class
 com\shoppe\order\model\Order.class
 com\shoppe\order\service\OrderService.class
 com\shoppe\order\dto\CartItemDto.class

@@ -2,12 +2,12 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-card',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-card',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <div 
-      class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300"
+      class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 transform-gpu will-change-transform"
       [ngClass]="[customClasses, hoverEffect ? 'hover:bg-white/10 hover:border-white/20 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]' : '']"
     >
       <div *ngIf="title || subtitle" class="p-6 border-b border-white/5 relative z-10">
@@ -26,10 +26,10 @@ import { CommonModule } from '@angular/common';
   `
 })
 export class CardComponent {
-    @Input() title: string = '';
-    @Input() subtitle: string = '';
-    @Input() footer: boolean = false;
-    @Input() customClasses: string = '';
-    @Input() bodyClasses: string = '';
-    @Input() hoverEffect: boolean = false;
+  @Input() title: string = '';
+  @Input() subtitle: string = '';
+  @Input() footer: boolean = false;
+  @Input() customClasses: string = '';
+  @Input() bodyClasses: string = '';
+  @Input() hoverEffect: boolean = false;
 }

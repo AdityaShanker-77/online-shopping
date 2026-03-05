@@ -26,6 +26,7 @@ import java.util.Map;
 public class ProductController {
 
     private final ProductService productService;
+    private final com.shoppe.product.service.DataImportService dataImportService;
 
     @GetMapping
     @Operation(summary = "Get all products with optional filters")
@@ -130,5 +131,11 @@ public class ProductController {
             response.put("warning", warning);
 
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/reset-catalog")
+    @Operation(summary = "Reset database and trigger import")
+    public ResponseEntity<String> resetCatalog() {
+        return ResponseEntity.ok(dataImportService.resetAndImport());
     }
 }

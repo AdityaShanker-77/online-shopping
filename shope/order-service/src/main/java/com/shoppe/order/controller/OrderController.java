@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -109,6 +110,15 @@ public class OrderController {
     }
 
     // ── Orders ───────────────────────────────
+
+    @PostMapping("/api/orders/payment-intent")
+    @Operation(summary = "Create Stripe Payment Intent")
+    public ResponseEntity<PaymentIntentResponse> createPaymentIntent(
+            @RequestHeader("X-Auth-UserId") Long userId,
+            @RequestBody Map<String, Object> body) {
+        BigDecimal amount = new BigDecimal(body.get("amount").toString());
+        return ResponseEntity.ok(orderService.createPaymentIntent(userId, amount));
+    }
 
     @PostMapping("/api/orders/checkout")
     public ResponseEntity<OrderDto> checkout(

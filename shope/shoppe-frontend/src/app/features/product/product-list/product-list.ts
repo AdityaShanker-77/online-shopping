@@ -22,7 +22,7 @@ export class ProductList implements OnInit {
   products: Product[] = [];
   categories: any[] = [];
   searchKeyword: string = '';
-  selectedCategoryId: number | undefined = undefined;
+  selectedCategoryId: string | number | undefined = undefined;
 
   constructor(
     private productService: ProductService,
@@ -82,5 +82,10 @@ export class ProductList implements OnInit {
         this.toastService.error(msg);
       }
     });
+  }
+
+  getProxiedImageUrl(imageUrl: string): string {
+    if (!imageUrl) return 'assets/no-image.png';
+    return imageUrl;
   }
 }

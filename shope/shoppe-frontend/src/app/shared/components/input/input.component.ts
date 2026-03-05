@@ -1,12 +1,19 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, forwardRef, Provider } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+
+const INPUT_VALUE_ACCESSOR: Provider = {
+  provide: NG_VALUE_ACCESSOR,
+  useExisting: forwardRef(() => InputComponent),
+  multi: true
+};
 
 @Component({
-    selector: 'app-input',
-    standalone: true,
-    imports: [CommonModule, FormsModule],
-    template: `
+  selector: 'app-input',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  providers: [INPUT_VALUE_ACCESSOR],
+  template: `
     <div class="flex flex-col gap-1 w-full" [class]="wrapperClass">
       <label *ngIf="label" [for]="id" class="text-sm font-medium text-slate-300 ml-1">{{ label }} <span *ngIf="required" class="text-red-400">*</span></label>
       <input 
@@ -25,21 +32,44 @@ import { FormsModule } from '@angular/forms';
     </div>
   `
 })
-export class InputComponent {
-    @Input() id: string = Math.random().toString(36).substring(7);
-    @Input() name: string = '';
-    @Input() type: string = 'text';
-    @Input() label: string = '';
-    @Input() placeholder: string = '';
-    @Input() disabled: boolean = false;
-    @Input() required: boolean = false;
-    @Input() value: any = '';
-    @Input() error: string | null = null;
-    @Input() wrapperClass: string = '';
+export class InputComponent implements ControlValueAccessor {
+  @Input() id: string = Math.random().toString(36).substring(7);
+  @Input() name: string = '';
+  @Input() type: string = 'text';
+  @Input() label: string = '';
+  @Input() placeholder: string = '';
+  @Input() disabled: boolean = false;
+  @Input() required: boolean = false;
+  @Input() value: any = '';
+  @Input() error: string | null = null;
+  @Input() wrapperClass: string = '';
 
-    @Output() valueChange = new EventEmitter<any>();
+  @Output() valueChange = new EventEmitter<any>();
 
-    onValueChange(val: any) {
-        this.valueChange.emit(val);
-    }
+  onChange: any = () => { };
+  onTouch: any = () => { };
+
+  onValueChange(val: any) {
+    this.value = val;
+    this.valueChange.emit(val);
+    this.onChange(val);
+    this.onTouch();
+  }
+
+  writeValue(obj: any): void {
+    this.value = obj;
+  }
+
+  registerOnChange(fn: any): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: any): void {
+    this.onTouch = fn;
+  }
+
+  setDisabledState?(isDisabled: boolean): void {
+    this.disabled = isDisabled;
+  }
 }
+

@@ -8,10 +8,12 @@ import { InputComponent } from '../../../shared/components/input/input.component
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { ToastService } from '../../../shared/services/toast.service';
 
+import { LucideAngularModule } from 'lucide-angular';
+
 @Component({
     selector: 'app-forgot-password',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule, ButtonComponent, InputComponent, CardComponent],
+    imports: [CommonModule, FormsModule, RouterModule, ButtonComponent, InputComponent, CardComponent, LucideAngularModule],
     templateUrl: './forgot-password.html',
     styleUrls: ['./forgot-password.css']
 })

@@ -8,10 +8,12 @@ import { InputComponent } from '../../../shared/components/input/input.component
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { ToastService } from '../../../shared/services/toast.service';
 
+import { LucideAngularModule } from 'lucide-angular';
+
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, ButtonComponent, InputComponent, CardComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ButtonComponent, InputComponent, CardComponent, LucideAngularModule],
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })

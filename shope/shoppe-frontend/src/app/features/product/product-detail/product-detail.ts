@@ -66,4 +66,9 @@ export class ProductDetail implements OnInit {
       });
     }
   }
+
+  getProxiedImageUrl(imageUrl: string): string {
+    if (!imageUrl) return 'assets/no-image.png';
+    return imageUrl;
+  }
 }
