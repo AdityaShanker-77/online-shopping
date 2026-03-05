@@ -24,7 +24,8 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserProfileDto> getMyProfile(
             @RequestHeader("X-Auth-User") String email,
-            @RequestHeader(value = "X-Auth-UserId", required = false) String userIdStr) {
+            @RequestHeader(value = "X-Auth-UserId", required = false) String userIdStr,
+            @RequestHeader(value = "X-Auth-Name", required = false) String nameStr) {
 
         Long userId = parseUserId(userIdStr);
         UserProfile profile = userProfileRepository.findByEmail(email)
@@ -32,11 +33,18 @@ public class UserController {
                     UserProfile p = new UserProfile();
                     p.setEmail(email);
                     p.setUserId(userId);
+                    p.setFullName(nameStr);
                     return userProfileRepository.save(p);
                 });
         // If profile exists but userId was null (old profile), update it
         if (profile.getUserId() == null && userId != null) {
             profile.setUserId(userId);
+            profile = userProfileRepository.save(profile);
+        }
+        // If profile exists but name is null, sync it from the JWT
+        if ((profile.getFullName() == null || profile.getFullName().isEmpty()) && nameStr != null
+                && !nameStr.isEmpty()) {
+            profile.setFullName(nameStr);
             profile = userProfileRepository.save(profile);
         }
         return ResponseEntity.ok(toDto(profile));

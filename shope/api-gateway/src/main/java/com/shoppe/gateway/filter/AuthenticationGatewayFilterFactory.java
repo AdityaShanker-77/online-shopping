@@ -49,10 +49,12 @@ public class AuthenticationGatewayFilterFactory
                 String username = claims.getSubject();
                 // Extract userId stored in JWT as claim "id"
                 String userId = claims.get("id") != null ? claims.get("id").toString() : "";
+                String name = claims.get("name") != null ? claims.get("name").toString() : "";
 
                 ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
                         .header("X-Auth-User", username)
                         .header("X-Auth-UserId", userId)
+                        .header("X-Auth-Name", name)
                         .build();
                 return chain.filter(exchange.mutate().request(modifiedRequest).build());
             } catch (Exception e) {

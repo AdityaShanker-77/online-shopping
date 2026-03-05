@@ -44,10 +44,10 @@ public class AuthController {
                 .getPrincipal();
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
         // Include userId ('id' claim) in JWT so gateway can inject X-Auth-UserId header
-        String jwt = jwtUtils.generateJwtToken(authentication, user.getId());
+        String jwt = jwtUtils.generateJwtToken(authentication, user.getId(), user.getName());
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).collect(Collectors.toList());
-        return ResponseEntity.ok(new JwtResponse(jwt, user.getId(), user.getEmail(), roles));
+        return ResponseEntity.ok(new JwtResponse(jwt, user.getId(), user.getName(), user.getEmail(), roles));
     }
 
     @PostMapping("/signup")

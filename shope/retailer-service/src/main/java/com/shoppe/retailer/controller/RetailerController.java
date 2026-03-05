@@ -82,6 +82,19 @@ public class RetailerController {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/{id}/revenue")
+    public ResponseEntity<Void> addRevenue(@PathVariable Long id, @RequestParam java.math.BigDecimal amount) {
+        Retailer r = retailerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Retailer not found"));
+        if (r.getRevenue() == null) {
+            r.setRevenue(amount);
+        } else {
+            r.setRevenue(r.getRevenue().add(amount));
+        }
+        retailerRepository.save(r);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/{id}/sales")
     public ResponseEntity<?> getSalesData(@PathVariable Long id) {
         Retailer r = retailerRepository.findById(id)

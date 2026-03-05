@@ -1,6 +1,7 @@
 package com.shoppe.order.service;
 
 import com.shoppe.order.client.ProductServiceClient;
+import com.shoppe.order.client.RetailerServiceClient;
 import com.shoppe.order.dto.*;
 import com.shoppe.order.model.*;
 import com.shoppe.order.repository.*;
@@ -27,6 +28,7 @@ public class OrderService {
     private final CompareItemRepository compareItemRepository;
     private final OrderRepository orderRepository;
     private final ProductServiceClient productServiceClient;
+    private final RetailerServiceClient retailerServiceClient;
 
     @Value("${stripe.secret.key}")
     private String stripeSecretKey;
@@ -240,6 +242,17 @@ public class OrderService {
             } catch (feign.FeignException.NotFound e) {
                 // Product exists via FakeStore fallback but not in local DB — skip stock
                 // deduction
+            }
+
+            // Update retailer revenue
+            if (product.getRetailerId() != null) {
+                BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+                try {
+                    retailerServiceClient.addRevenue(product.getRetailerId(), itemTotal);
+                } catch (Exception e) {
+                    System.err.println(
+                            "Failed to update revenue for retailer " + product.getRetailerId() + ": " + e.getMessage());
+                }
             }
 
             OrderItem oi = new OrderItem();

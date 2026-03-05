@@ -26,8 +26,8 @@ public class JwtUtils {
     }
 
     public String generateJwtToken(Authentication authentication) {
-        org.springframework.security.core.userdetails.User userPrincipal =
-                (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+        org.springframework.security.core.userdetails.User userPrincipal = (org.springframework.security.core.userdetails.User) authentication
+                .getPrincipal();
         String roles = userPrincipal.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
@@ -40,9 +40,9 @@ public class JwtUtils {
                 .compact();
     }
 
-    public String generateJwtToken(Authentication authentication, Long userId) {
-        org.springframework.security.core.userdetails.User userPrincipal =
-                (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+    public String generateJwtToken(Authentication authentication, Long userId, String name) {
+        org.springframework.security.core.userdetails.User userPrincipal = (org.springframework.security.core.userdetails.User) authentication
+                .getPrincipal();
         String roles = userPrincipal.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
@@ -50,6 +50,7 @@ public class JwtUtils {
                 .setSubject(userPrincipal.getUsername())
                 .claim("roles", roles)
                 .claim("id", userId)
+                .claim("name", name)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
