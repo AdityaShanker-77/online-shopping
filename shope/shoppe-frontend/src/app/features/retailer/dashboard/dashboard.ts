@@ -7,7 +7,7 @@ import { RetailerProfile } from '../models/retailer';
 import { Product } from '../../product/models/product';
 import { RouterModule } from '@angular/router';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { InputComponent } from '../../../shared/components/input/input.component';
+
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { ToastService } from '../../../shared/services/toast.service';
 import { LucideAngularModule, Store, User, DollarSign, Package, Edit, Plus, AlertCircle, CheckCircle2 } from 'lucide-angular';
@@ -15,7 +15,7 @@ import { LucideAngularModule, Store, User, DollarSign, Package, Edit, Plus, Aler
 @Component({
     selector: 'app-retailer-dashboard',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule, ButtonComponent, InputComponent, CardComponent, LucideAngularModule],
+    imports: [CommonModule, RouterModule, FormsModule, ButtonComponent, CardComponent, LucideAngularModule],
     templateUrl: './dashboard.html',
     styleUrls: ['./dashboard.css']
 })

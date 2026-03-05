@@ -3,14 +3,14 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { OrderService } from '../services/order.service';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { CardComponent } from '../../../shared/components/card/card.component';
+
 import { ToastService } from '../../../shared/services/toast.service';
 import { LucideAngularModule, HeartCrack, ShoppingCart, Trash2, Tag } from 'lucide-angular';
 
 @Component({
     selector: 'app-wishlist',
     standalone: true,
-    imports: [CommonModule, RouterModule, ButtonComponent, CardComponent, LucideAngularModule],
+    imports: [CommonModule, RouterModule, ButtonComponent, LucideAngularModule],
     templateUrl: './wishlist.html',
     styleUrls: ['./wishlist.css']
 })

@@ -6,15 +6,14 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { OrderService } from '../../order/services/order.service';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { InputComponent } from '../../../shared/components/input/input.component';
-import { CardComponent } from '../../../shared/components/card/card.component';
+
 import { ToastService } from '../../../shared/services/toast.service';
 import { LucideAngularModule, Heart, ShoppingCart, ArrowLeftRight, Search, ChevronLeft, ChevronRight } from 'lucide-angular';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, ButtonComponent, InputComponent, CardComponent, LucideAngularModule],
+  imports: [CommonModule, RouterModule, FormsModule, ButtonComponent, LucideAngularModule],
   templateUrl: './product-list.html',
   styleUrls: ['./product-list.css']
 })
