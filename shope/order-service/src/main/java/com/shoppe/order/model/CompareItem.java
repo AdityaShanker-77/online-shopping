@@ -24,7 +24,7 @@ public class CompareItem {
     @Column(name = "product_name", length = 200)
     private String productName;
 
-    @Column(name = "image_url")
+    @Column(name = "image_url", length = 10000000)
     private String imageUrl;
 
     @Column(name = "price")

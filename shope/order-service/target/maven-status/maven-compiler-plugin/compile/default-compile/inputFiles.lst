@@ -1,5 +1,6 @@
 c:\Users\Aditya.Shanker\Downloads\shope\shope\order-service\src\main\java\com\shoppe\order\repository\CompareItemRepository.java
 c:\Users\Aditya.Shanker\Downloads\shope\shope\order-service\src\main\java\com\shoppe\order\dto\OrderDto.java
+c:\Users\Aditya.Shanker\Downloads\shope\shope\order-service\src\main\java\com\shoppe\order\config\DatabaseMigrationRunner.java
 c:\Users\Aditya.Shanker\Downloads\shope\shope\order-service\src\main\java\com\shoppe\order\dto\PaymentIntentResponse.java
 c:\Users\Aditya.Shanker\Downloads\shope\shope\order-service\src\main\java\com\shoppe\order\dto\CheckoutSessionResponse.java
 c:\Users\Aditya.Shanker\Downloads\shope\shope\order-service\src\main\java\com\shoppe\order\model\Order.java

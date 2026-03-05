@@ -5,8 +5,11 @@ import lombok.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "cart_items", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "product_id"}))
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Table(name = "cart_items", uniqueConstraints = @UniqueConstraint(columnNames = { "user_id", "product_id" }))
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class CartItem {
 
     @Id
@@ -25,7 +28,7 @@ public class CartItem {
     @Column(precision = 10, scale = 2)
     private BigDecimal price;
 
-    @Column(name = "image_url")
+    @Column(name = "image_url", length = 10000000)
     private String imageUrl;
 
     @Column(nullable = false)

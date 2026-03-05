@@ -4,8 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "wishlists", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "product_id"}))
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Table(name = "wishlists", uniqueConstraints = @UniqueConstraint(columnNames = { "user_id", "product_id" }))
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Wishlist {
 
     @Id
@@ -21,6 +24,6 @@ public class Wishlist {
     @Column(name = "product_name", length = 200)
     private String productName;
 
-    @Column(name = "image_url")
+    @Column(name = "image_url", length = 10000000)
     private String imageUrl;
 }
