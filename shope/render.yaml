@@ -3,6 +3,7 @@ services:
   - type: web
     name: shoppe-eureka
     env: docker
+    rootDir: shope
     dockerfilePath: ./eureka-server/Dockerfile
     dockerContext: .
     plan: free
@@ -14,6 +15,7 @@ services:
   - type: web
     name: shoppe-gateway
     env: docker
+    rootDir: shope
     dockerfilePath: ./api-gateway/Dockerfile
     dockerContext: .
     plan: free
@@ -29,6 +31,7 @@ services:
   - type: web
     name: shoppe-auth
     env: docker
+    rootDir: shope
     dockerfilePath: ./auth-service/Dockerfile
     dockerContext: .
     plan: free
@@ -38,7 +41,7 @@ services:
       - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
         value: http://shoppe-eureka:8761/eureka/
       - key: SPRING_DATASOURCE_URL
-        sync: false # Set manually in Render Dashboard using your Aiven MySQL URL
+        sync: false
       - key: SPRING_DATASOURCE_USERNAME
         sync: false
       - key: SPRING_DATASOURCE_PASSWORD
@@ -50,6 +53,7 @@ services:
   - type: web
     name: shoppe-user
     env: docker
+    rootDir: shope
     dockerfilePath: ./user-service/Dockerfile
     dockerContext: .
     plan: free
@@ -69,6 +73,7 @@ services:
   - type: web
     name: shoppe-product
     env: docker
+    rootDir: shope
     dockerfilePath: ./product-service/Dockerfile
     dockerContext: .
     plan: free
@@ -88,6 +93,7 @@ services:
   - type: web
     name: shoppe-order
     env: docker
+    rootDir: shope
     dockerfilePath: ./order-service/Dockerfile
     dockerContext: .
     plan: free
@@ -109,6 +115,7 @@ services:
   - type: web
     name: shoppe-retailer
     env: docker
+    rootDir: shope
     dockerfilePath: ./retailer-service/Dockerfile
     dockerContext: .
     plan: free
@@ -128,11 +135,14 @@ services:
   - type: web
     name: shoppe-frontend
     env: static
+    rootDir: shope/shoppe-frontend
     buildCommand: npm install && npm run build
-    staticPublishPath: ./shoppe-frontend/dist/shoppe-frontend/browser
-    rootDir: shoppe-frontend
+    staticPublishPath: ./dist/shoppe-frontend/browser
     plan: free
-    fallback: index.html
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
     envVars:
       - key: NODE_VERSION
         value: 18.19.0
