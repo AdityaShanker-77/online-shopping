@@ -138,7 +138,6 @@ services:
     rootDir: shope/shoppe-frontend
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist/shoppe-frontend/browser
-    plan: free
     routes:
       - type: rewrite
         source: /*
