@@ -144,4 +144,4 @@ services:
         destination: /index.html
     envVars:
       - key: NODE_VERSION
-        value: 18.19.0
+        value: 20.19.0
