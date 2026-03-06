@@ -10,6 +10,8 @@ services:
     envVars:
       - key: PORT
         value: 8761
+      - key: JAVA_OPTS
+        value: "-Xmx256m -Xms256m -XX:MaxMetaspaceSize=128m"
 
   # 2. API Gateway
   - type: web
@@ -22,6 +24,8 @@ services:
     envVars:
       - key: PORT
         value: 8080
+      - key: JAVA_OPTS
+        value: "-Xmx256m -Xms256m -XX:MaxMetaspaceSize=128m"
       - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
         value: http://shoppe-eureka:8761/eureka/
       - key: shoppe.jwt.secret
@@ -38,6 +42,8 @@ services:
     envVars:
       - key: PORT
         value: 8081
+      - key: JAVA_OPTS
+        value: "-Xmx256m -Xms256m -XX:MaxMetaspaceSize=128m"
       - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
         value: http://shoppe-eureka:8761/eureka/
       - key: SPRING_DATASOURCE_URL
@@ -60,6 +66,8 @@ services:
     envVars:
       - key: PORT
         value: 8082
+      - key: JAVA_OPTS
+        value: "-Xmx256m -Xms256m -XX:MaxMetaspaceSize=128m"
       - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
         value: http://shoppe-eureka:8761/eureka/
       - key: SPRING_DATASOURCE_URL
@@ -80,6 +88,8 @@ services:
     envVars:
       - key: PORT
         value: 8084
+      - key: JAVA_OPTS
+        value: "-Xmx256m -Xms256m -XX:MaxMetaspaceSize=128m"
       - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
         value: http://shoppe-eureka:8761/eureka/
       - key: SPRING_DATASOURCE_URL
@@ -100,6 +110,8 @@ services:
     envVars:
       - key: PORT
         value: 8083
+      - key: JAVA_OPTS
+        value: "-Xmx256m -Xms256m -XX:MaxMetaspaceSize=128m"
       - key: stripe.secret.key
         sync: false
       - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
@@ -122,6 +134,8 @@ services:
     envVars:
       - key: PORT
         value: 8085
+      - key: JAVA_OPTS
+        value: "-Xmx256m -Xms256m -XX:MaxMetaspaceSize=128m"
       - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
         value: http://shoppe-eureka:8761/eureka/
       - key: SPRING_DATASOURCE_URL
