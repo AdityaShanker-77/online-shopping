@@ -1,0 +1,138 @@
+services:
+  # 1. Service Discovery
+  - type: web
+    name: shoppe-eureka
+    env: docker
+    dockerfilePath: ./eureka-server/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8761
+
+  # 2. API Gateway
+  - type: web
+    name: shoppe-gateway
+    env: docker
+    dockerfilePath: ./api-gateway/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        value: http://shoppe-eureka:8761/eureka/
+      - key: shoppe.jwt.secret
+        value: ShoppESecretKeyForJwtAuthenticationMustBeAtLeast256BitsLongAndSecure
+
+  # 3. Auth Service
+  - type: web
+    name: shoppe-auth
+    env: docker
+    dockerfilePath: ./auth-service/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8081
+      - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        value: http://shoppe-eureka:8761/eureka/
+      - key: SPRING_DATASOURCE_URL
+        sync: false # Set manually in Render Dashboard using your Aiven MySQL URL
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: shoppe.jwt.secret
+        value: ShoppESecretKeyForJwtAuthenticationMustBeAtLeast256BitsLongAndSecure
+
+  # 4. User Service
+  - type: web
+    name: shoppe-user
+    env: docker
+    dockerfilePath: ./user-service/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8082
+      - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        value: http://shoppe-eureka:8761/eureka/
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+
+  # 5. Product Service
+  - type: web
+    name: shoppe-product
+    env: docker
+    dockerfilePath: ./product-service/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8084
+      - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        value: http://shoppe-eureka:8761/eureka/
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+
+  # 6. Order Service
+  - type: web
+    name: shoppe-order
+    env: docker
+    dockerfilePath: ./order-service/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8083
+      - key: stripe.secret.key
+        sync: false
+      - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        value: http://shoppe-eureka:8761/eureka/
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+
+  # 7. Retailer Service
+  - type: web
+    name: shoppe-retailer
+    env: docker
+    dockerfilePath: ./retailer-service/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8085
+      - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        value: http://shoppe-eureka:8761/eureka/
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+
+  # 8. Frontend
+  - type: web
+    name: shoppe-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./shoppe-frontend/dist/shoppe-frontend/browser
+    rootDir: shoppe-frontend
+    plan: free
+    fallback: index.html
+    envVars:
+      - key: NODE_VERSION
+        value: 18.19.0
