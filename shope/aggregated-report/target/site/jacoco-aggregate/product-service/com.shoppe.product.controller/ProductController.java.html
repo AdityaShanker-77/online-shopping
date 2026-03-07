@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>ProductController.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">aggregated-report</a> &gt; <a href="../index.html" class="el_bundle">product-service</a> &gt; <a href="index.source.html" class="el_package">com.shoppe.product.controller</a> &gt; <span class="el_source">ProductController.java</span></div><h1>ProductController.java</h1><pre class="source lang-java linenums">package com.shoppe.product.controller;
+
+import com.shoppe.product.dto.ProductDto;
+import com.shoppe.product.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping(&quot;/api/products&quot;)
+@RequiredArgsConstructor
+@CrossOrigin(origins = &quot;*&quot;)
+@Tag(name = &quot;Product API&quot;)
+public class ProductController {
+
+    private final ProductService productService;
+    private final com.shoppe.product.service.DataImportService dataImportService;
+
+    @GetMapping
+    @Operation(summary = &quot;Get all products with optional filters&quot;)
+    public ResponseEntity&lt;List&lt;ProductDto&gt;&gt; getAllProducts(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long categoryId) {
+
+<span class="nc bnc" id="L37" title="All 4 branches missed.">        if (keyword != null &amp;&amp; !keyword.isBlank()) {</span>
+<span class="nc bnc" id="L38" title="All 2 branches missed.">            if (categoryId != null) {</span>
+<span class="nc" id="L39">                return ResponseEntity.ok(productService.searchProductsInCategory(keyword, categoryId));</span>
+            }
+<span class="nc" id="L41">            return ResponseEntity.ok(productService.searchProducts(keyword));</span>
+        }
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (categoryId != null) {</span>
+<span class="nc" id="L44">            return ResponseEntity.ok(productService.getProductsByCategory(categoryId));</span>
+        }
+<span class="nc" id="L46">        return ResponseEntity.ok(productService.getAllProducts());</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    @Operation(summary = &quot;Get product by ID&quot;)
+    public ResponseEntity&lt;ProductDto&gt; getProductById(@PathVariable Long id) {
+<span class="nc" id="L52">        return ResponseEntity.ok(productService.getProductById(id));</span>
+    }
+
+    @PostMapping
+    @Operation(summary = &quot;Create a product&quot;)
+    public ResponseEntity&lt;ProductDto&gt; createProduct(@Valid @RequestBody ProductDto dto) {
+<span class="nc" id="L58">        return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(dto));</span>
+    }
+
+    @PutMapping(&quot;/{id}&quot;)
+    @Operation(summary = &quot;Update a product&quot;)
+    public ResponseEntity&lt;ProductDto&gt; updateProduct(@PathVariable Long id, @Valid @RequestBody ProductDto dto) {
+<span class="nc" id="L64">        return ResponseEntity.ok(productService.updateProduct(id, dto));</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    @Operation(summary = &quot;Delete a product&quot;)
+    public ResponseEntity&lt;Void&gt; deleteProduct(@PathVariable Long id) {
+<span class="nc" id="L70">        productService.deleteProduct(id);</span>
+<span class="nc" id="L71">        return ResponseEntity.noContent().build();</span>
+    }
+
+    @GetMapping(&quot;/search&quot;)
+    @Operation(summary = &quot;Search products by keyword&quot;)
+    public ResponseEntity&lt;List&lt;ProductDto&gt;&gt; searchProducts(@RequestParam String keyword) {
+<span class="nc" id="L77">        return ResponseEntity.ok(productService.searchProducts(keyword));</span>
+    }
+
+    @GetMapping(&quot;/by-retailer/{retailerId}&quot;)
+    @Operation(summary = &quot;Get products by retailer&quot;)
+    public ResponseEntity&lt;List&lt;ProductDto&gt;&gt; getByRetailer(@PathVariable Long retailerId) {
+<span class="nc" id="L83">        return ResponseEntity.ok(productService.getProductsByRetailer(retailerId));</span>
+    }
+
+    @GetMapping(&quot;/by-category/{categoryId}&quot;)
+    @Operation(summary = &quot;Get products by category&quot;)
+    public ResponseEntity&lt;List&lt;ProductDto&gt;&gt; getByCategory(@PathVariable Long categoryId) {
+<span class="nc" id="L89">        return ResponseEntity.ok(productService.getProductsByCategory(categoryId));</span>
+    }
+
+    @PostMapping(&quot;/upload-image&quot;)
+    @Operation(summary = &quot;Upload a product image file&quot;)
+    public ResponseEntity&lt;?&gt; uploadProductImage(@RequestParam(&quot;file&quot;) MultipartFile file) throws IOException {
+        // Validate content type
+<span class="nc" id="L96">        String contentType = file.getContentType();</span>
+<span class="nc bnc" id="L97" title="All 6 branches missed.">        if (contentType == null || !(contentType.equals(&quot;image/jpeg&quot;) || contentType.equals(&quot;image/png&quot;)</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">                || contentType.equals(&quot;image/webp&quot;))) {</span>
+<span class="nc" id="L99">            return ResponseEntity.badRequest().body(Map.of(</span>
+<span class="nc" id="L100">                    &quot;message&quot;, &quot;Invalid format. Only JPEG, PNG, and WebP are accepted.&quot;));</span>
+        }
+
+        // Validate file size (max 5MB)
+<span class="nc bnc" id="L104" title="All 2 branches missed.">        if (file.getSize() &gt; 5 * 1024 * 1024) {</span>
+<span class="nc" id="L105">            return ResponseEntity.badRequest().body(Map.of(</span>
+<span class="nc" id="L106">                    &quot;message&quot;, &quot;File size must not exceed 5MB.&quot;));</span>
+        }
+
+        // Read image dimensions
+<span class="nc" id="L110">        BufferedImage img = ImageIO.read(file.getInputStream());</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        int width = img != null ? img.getWidth() : 0;</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        int height = img != null ? img.getHeight() : 0;</span>
+
+<span class="nc" id="L114">        String warning = null;</span>
+<span class="nc bnc" id="L115" title="All 4 branches missed.">        if (width &lt; 600 || height &lt; 600) {</span>
+<span class="nc" id="L116">            warning = &quot;Image is too small (&quot; + width + &quot;x&quot; + height</span>
+                    + &quot;). Recommended: at least 800x800px for best quality.&quot;;
+<span class="nc bnc" id="L118" title="All 4 branches missed.">        } else if (width &gt; 2000 || height &gt; 2000) {</span>
+<span class="nc" id="L119">            warning = &quot;Image is very large (&quot; + width + &quot;x&quot; + height + &quot;). Recommended: 800x800 to 1200x1200px.&quot;;</span>
+        }
+
+        // Convert to Base64 data URL
+<span class="nc" id="L123">        String base64 = Base64.getEncoder().encodeToString(file.getBytes());</span>
+<span class="nc" id="L124">        String dataUrl = &quot;data:&quot; + contentType + &quot;;base64,&quot; + base64;</span>
+
+<span class="nc" id="L126">        var response = new java.util.LinkedHashMap&lt;String, Object&gt;();</span>
+<span class="nc" id="L127">        response.put(&quot;imageUrl&quot;, dataUrl);</span>
+<span class="nc" id="L128">        response.put(&quot;width&quot;, width);</span>
+<span class="nc" id="L129">        response.put(&quot;height&quot;, height);</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">        if (warning != null)</span>
+<span class="nc" id="L131">            response.put(&quot;warning&quot;, warning);</span>
+
+<span class="nc" id="L133">        return ResponseEntity.ok(response);</span>
+    }
+
+    @DeleteMapping(&quot;/reset-catalog&quot;)
+    @Operation(summary = &quot;Reset database and trigger import&quot;)
+    public ResponseEntity&lt;String&gt; resetCatalog() {
+<span class="nc" id="L139">        return ResponseEntity.ok(dataImportService.resetAndImport());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

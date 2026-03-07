@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>RetailerController.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">aggregated-report</a> &gt; <a href="../index.html" class="el_bundle">retailer-service</a> &gt; <a href="index.source.html" class="el_package">com.shoppe.retailer.controller</a> &gt; <span class="el_source">RetailerController.java</span></div><h1>RetailerController.java</h1><pre class="source lang-java linenums">package com.shoppe.retailer.controller;
+
+import com.shoppe.retailer.dto.RetailerDto;
+import com.shoppe.retailer.model.Retailer;
+import com.shoppe.retailer.repository.RetailerRepository;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping(&quot;/api/retailers&quot;)
+@RequiredArgsConstructor
+@CrossOrigin(origins = &quot;*&quot;)
+public class RetailerController {
+
+    private final RetailerRepository retailerRepository;
+
+    @GetMapping
+    public ResponseEntity&lt;List&lt;RetailerDto&gt;&gt; getAll() {
+<span class="nc" id="L25">        return ResponseEntity.ok(retailerRepository.findAll().stream().map(this::toDto).collect(Collectors.toList()));</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;RetailerDto&gt; getById(@PathVariable Long id) {
+<span class="nc" id="L30">        return retailerRepository.findById(id)</span>
+<span class="nc" id="L31">                .map(r -&gt; ResponseEntity.ok(toDto(r)))</span>
+<span class="nc" id="L32">                .orElse(ResponseEntity.notFound().build());</span>
+    }
+
+    @GetMapping(&quot;/by-user/{userId}&quot;)
+    public ResponseEntity&lt;RetailerDto&gt; getByUser(@PathVariable Long userId) {
+<span class="nc" id="L37">        return retailerRepository.findByUserId(userId)</span>
+<span class="nc" id="L38">                .map(r -&gt; ResponseEntity.ok(toDto(r)))</span>
+<span class="nc" id="L39">                .orElse(ResponseEntity.notFound().build());</span>
+    }
+
+    @GetMapping(&quot;/profile&quot;)
+    public ResponseEntity&lt;RetailerDto&gt; getProfile(@RequestHeader(&quot;X-Auth-UserId&quot;) Long userId) {
+<span class="nc" id="L44">        return retailerRepository.findByUserId(userId)</span>
+<span class="nc" id="L45">                .map(r -&gt; ResponseEntity.ok(toDto(r)))</span>
+<span class="nc" id="L46">                .orElse(ResponseEntity.notFound().build());</span>
+    }
+
+    @PostMapping
+    public ResponseEntity&lt;RetailerDto&gt; create(
+            @RequestHeader(&quot;X-Auth-User&quot;) String email,
+            @Valid @RequestBody RetailerDto dto) {
+<span class="nc" id="L53">        Retailer r = new Retailer();</span>
+<span class="nc" id="L54">        r.setUserId(dto.getUserId());</span>
+<span class="nc" id="L55">        r.setStoreName(dto.getStoreName());</span>
+<span class="nc" id="L56">        r.setEmail(email);</span>
+<span class="nc" id="L57">        r.setDescription(dto.getDescription());</span>
+<span class="nc" id="L58">        r.setApproved(false);</span>
+<span class="nc" id="L59">        return ResponseEntity.status(HttpStatus.CREATED).body(toDto(retailerRepository.save(r)));</span>
+    }
+
+    @PutMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;RetailerDto&gt; update(@PathVariable Long id, @Valid @RequestBody RetailerDto dto) {
+<span class="nc" id="L64">        Retailer r = retailerRepository.findById(id)</span>
+<span class="nc" id="L65">                .orElseThrow(() -&gt; new RuntimeException(&quot;Retailer not found&quot;));</span>
+<span class="nc" id="L66">        r.setStoreName(dto.getStoreName());</span>
+<span class="nc" id="L67">        r.setDescription(dto.getDescription());</span>
+<span class="nc" id="L68">        return ResponseEntity.ok(toDto(retailerRepository.save(r)));</span>
+    }
+
+    @PatchMapping(&quot;/{id}/approve&quot;)
+    public ResponseEntity&lt;RetailerDto&gt; approve(@PathVariable Long id) {
+<span class="nc" id="L73">        Retailer r = retailerRepository.findById(id)</span>
+<span class="nc" id="L74">                .orElseThrow(() -&gt; new RuntimeException(&quot;Retailer not found&quot;));</span>
+<span class="nc" id="L75">        r.setApproved(true);</span>
+<span class="nc" id="L76">        return ResponseEntity.ok(toDto(retailerRepository.save(r)));</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Void&gt; delete(@PathVariable Long id) {
+<span class="nc" id="L81">        retailerRepository.deleteById(id);</span>
+<span class="nc" id="L82">        return ResponseEntity.noContent().build();</span>
+    }
+
+    @PutMapping(&quot;/{id}/revenue&quot;)
+    public ResponseEntity&lt;Void&gt; addRevenue(@PathVariable Long id, @RequestParam java.math.BigDecimal amount) {
+<span class="nc" id="L87">        Retailer r = retailerRepository.findById(id)</span>
+<span class="nc" id="L88">                .orElseThrow(() -&gt; new RuntimeException(&quot;Retailer not found&quot;));</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        if (r.getRevenue() == null) {</span>
+<span class="nc" id="L90">            r.setRevenue(amount);</span>
+<span class="nc" id="L91">        } else {</span>
+<span class="nc" id="L92">            r.setRevenue(r.getRevenue().add(amount));</span>
+        }
+<span class="nc" id="L94">        retailerRepository.save(r);</span>
+<span class="nc" id="L95">        return ResponseEntity.ok().build();</span>
+    }
+
+    @GetMapping(&quot;/{id}/sales&quot;)
+    public ResponseEntity&lt;?&gt; getSalesData(@PathVariable Long id) {
+<span class="nc" id="L100">        Retailer r = retailerRepository.findById(id)</span>
+<span class="nc" id="L101">                .orElseThrow(() -&gt; new RuntimeException(&quot;Retailer not found&quot;));</span>
+<span class="nc" id="L102">        Map&lt;String, Object&gt; sales = new java.util.HashMap&lt;&gt;();</span>
+<span class="nc" id="L103">        sales.put(&quot;retailerId&quot;, r.getId());</span>
+<span class="nc" id="L104">        sales.put(&quot;storeName&quot;, r.getStoreName());</span>
+<span class="nc" id="L105">        sales.put(&quot;totalRevenue&quot;, r.getRevenue());</span>
+<span class="nc" id="L106">        return ResponseEntity.ok(sales);</span>
+    }
+
+    private RetailerDto toDto(Retailer r) {
+<span class="nc" id="L110">        RetailerDto dto = new RetailerDto();</span>
+<span class="nc" id="L111">        dto.setId(r.getId());</span>
+<span class="nc" id="L112">        dto.setUserId(r.getUserId());</span>
+<span class="nc" id="L113">        dto.setStoreName(r.getStoreName());</span>
+<span class="nc" id="L114">        dto.setEmail(r.getEmail());</span>
+<span class="nc" id="L115">        dto.setRevenue(r.getRevenue());</span>
+<span class="nc" id="L116">        dto.setApproved(r.isApproved());</span>
+<span class="nc" id="L117">        dto.setDescription(r.getDescription());</span>
+<span class="nc" id="L118">        return dto;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

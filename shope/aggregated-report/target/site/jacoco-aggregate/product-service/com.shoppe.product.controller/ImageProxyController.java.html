@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>ImageProxyController.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">aggregated-report</a> &gt; <a href="../index.html" class="el_bundle">product-service</a> &gt; <a href="index.source.html" class="el_package">com.shoppe.product.controller</a> &gt; <span class="el_source">ImageProxyController.java</span></div><h1>ImageProxyController.java</h1><pre class="source lang-java linenums">package com.shoppe.product.controller;
+
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+
+@RestController
+@RequestMapping(&quot;/api/images&quot;)
+<span class="nc" id="L14">public class ImageProxyController {</span>
+
+    /**
+     * Proxies an external image URL through the backend server.
+     * This bypasses corporate firewall restrictions and imgur hotlinking blocks.
+     * Usage:
+     * /api/images/proxy?url=https://images.pexels.com/photos/xyz/pexels-photo-xyz.jpeg
+     */
+    @GetMapping(&quot;/proxy&quot;)
+    public ResponseEntity&lt;byte[]&gt; proxyImage(@RequestParam(&quot;url&quot;) String imageUrl) {
+        try {
+            // Use raw HttpURLConnection instead of RestTemplate for better control
+<span class="nc" id="L26">            URL url = new URL(imageUrl);</span>
+<span class="nc" id="L27">            HttpURLConnection connection = (HttpURLConnection) url.openConnection();</span>
+<span class="nc" id="L28">            connection.setRequestMethod(&quot;GET&quot;);</span>
+<span class="nc" id="L29">            connection.setRequestProperty(&quot;User-Agent&quot;, &quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36&quot;);</span>
+<span class="nc" id="L30">            connection.setRequestProperty(&quot;Accept&quot;, &quot;image/*,*/*&quot;);</span>
+<span class="nc" id="L31">            connection.setRequestProperty(&quot;Referer&quot;, url.getProtocol() + &quot;://&quot; + url.getHost() + &quot;/&quot;);</span>
+<span class="nc" id="L32">            connection.setConnectTimeout(10000);</span>
+<span class="nc" id="L33">            connection.setReadTimeout(10000);</span>
+<span class="nc" id="L34">            connection.setInstanceFollowRedirects(true);</span>
+
+<span class="nc" id="L36">            int responseCode = connection.getResponseCode();</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">            if (responseCode != 200) {</span>
+<span class="nc" id="L38">                return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();</span>
+            }
+
+            // Read the image bytes
+<span class="nc" id="L42">            InputStream inputStream = connection.getInputStream();</span>
+<span class="nc" id="L43">            ByteArrayOutputStream buffer = new ByteArrayOutputStream();</span>
+<span class="nc" id="L44">            byte[] data = new byte[8192];</span>
+            int bytesRead;
+<span class="nc bnc" id="L46" title="All 2 branches missed.">            while ((bytesRead = inputStream.read(data, 0, data.length)) != -1) {</span>
+<span class="nc" id="L47">                buffer.write(data, 0, bytesRead);</span>
+            }
+<span class="nc" id="L49">            inputStream.close();</span>
+<span class="nc" id="L50">            byte[] imageBytes = buffer.toByteArray();</span>
+
+<span class="nc bnc" id="L52" title="All 2 branches missed.">            if (imageBytes.length &lt; 100) {</span>
+                // Tiny response (like imgur's 1x1 GIF block) - return 502
+<span class="nc" id="L54">                return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();</span>
+            }
+
+<span class="nc" id="L57">            HttpHeaders responseHeaders = new HttpHeaders();</span>
+<span class="nc" id="L58">            String contentType = connection.getContentType();</span>
+<span class="nc bnc" id="L59" title="All 4 branches missed.">            if (contentType != null &amp;&amp; contentType.startsWith(&quot;image&quot;)) {</span>
+<span class="nc" id="L60">                responseHeaders.set(&quot;Content-Type&quot;, contentType);</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">            } else if (imageUrl.endsWith(&quot;.png&quot;)) {</span>
+<span class="nc" id="L62">                responseHeaders.setContentType(MediaType.IMAGE_PNG);</span>
+<span class="nc" id="L63">            } else {</span>
+<span class="nc" id="L64">                responseHeaders.setContentType(MediaType.IMAGE_JPEG);</span>
+            }
+            // Cache for 7 days to avoid repeated proxy calls
+<span class="nc" id="L67">            responseHeaders.setCacheControl(CacheControl.maxAge(java.time.Duration.ofDays(7)));</span>
+<span class="nc" id="L68">            responseHeaders.set(&quot;Access-Control-Allow-Origin&quot;, &quot;*&quot;);</span>
+
+<span class="nc" id="L70">            return new ResponseEntity&lt;&gt;(imageBytes, responseHeaders, HttpStatus.OK);</span>
+<span class="nc" id="L71">        } catch (Exception e) {</span>
+<span class="nc" id="L72">            System.err.println(&quot;Image proxy error for URL: &quot; + imageUrl + &quot; - &quot; + e.getMessage());</span>
+<span class="nc" id="L73">            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

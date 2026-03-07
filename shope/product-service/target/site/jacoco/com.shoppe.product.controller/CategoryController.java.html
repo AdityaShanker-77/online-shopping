@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CategoryController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Shopp-E Product Service</a> &gt; <a href="index.source.html" class="el_package">com.shoppe.product.controller</a> &gt; <span class="el_source">CategoryController.java</span></div><h1>CategoryController.java</h1><pre class="source lang-java linenums">package com.shoppe.product.controller;
+
+import com.shoppe.product.dto.CategoryDto;
+import com.shoppe.product.exception.ResourceNotFoundException;
+import com.shoppe.product.model.Category;
+import com.shoppe.product.repository.CategoryRepository;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping(&quot;/api/categories&quot;)
+@RequiredArgsConstructor
+@CrossOrigin(origins = &quot;*&quot;)
+public class CategoryController {
+
+    private final CategoryRepository categoryRepository;
+
+    @GetMapping
+    public ResponseEntity&lt;List&lt;CategoryDto&gt;&gt; getAll() {
+<span class="nc" id="L25">        return ResponseEntity.ok(categoryRepository.findAll().stream().map(this::toDto).collect(Collectors.toList()));</span>
+    }
+
+    @PostMapping
+    public ResponseEntity&lt;CategoryDto&gt; create(@Valid @RequestBody CategoryDto dto) {
+<span class="nc" id="L30">        Category cat = new Category();</span>
+<span class="nc" id="L31">        cat.setName(dto.getName());</span>
+<span class="nc" id="L32">        cat.setDescription(dto.getDescription());</span>
+<span class="nc" id="L33">        return ResponseEntity.status(HttpStatus.CREATED).body(toDto(categoryRepository.save(cat)));</span>
+    }
+
+    @PutMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;CategoryDto&gt; update(@PathVariable Long id, @Valid @RequestBody CategoryDto dto) {
+<span class="nc" id="L38">        Category cat = categoryRepository.findById(id)</span>
+<span class="nc" id="L39">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Category not found&quot;));</span>
+<span class="nc" id="L40">        cat.setName(dto.getName());</span>
+<span class="nc" id="L41">        cat.setDescription(dto.getDescription());</span>
+<span class="nc" id="L42">        return ResponseEntity.ok(toDto(categoryRepository.save(cat)));</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Void&gt; delete(@PathVariable Long id) {
+<span class="nc" id="L47">        categoryRepository.deleteById(id);</span>
+<span class="nc" id="L48">        return ResponseEntity.noContent().build();</span>
+    }
+
+    private CategoryDto toDto(Category c) {
+<span class="nc" id="L52">        CategoryDto dto = new CategoryDto();</span>
+<span class="nc" id="L53">        dto.setId(c.getId());</span>
+<span class="nc" id="L54">        dto.setName(c.getName());</span>
+<span class="nc" id="L55">        dto.setDescription(c.getDescription());</span>
+<span class="nc" id="L56">        return dto;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

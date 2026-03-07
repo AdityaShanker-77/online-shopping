@@ -32,7 +32,18 @@
     <module>product-service</module>
     <module>order-service</module>
     <module>retailer-service</module>
+    <module>aggregated-report</module>
   </modules>
+
+  <dependencies>
+    <!-- JaCoCo API dependency for runtime coverage -->
+    <dependency>
+        <groupId>org.jacoco</groupId>
+        <artifactId>org.jacoco.core</artifactId>
+        <version>0.8.11</version>
+        <scope>test</scope>
+    </dependency>
+  </dependencies>
 
   <dependencyManagement>
     <dependencies>
@@ -59,6 +70,35 @@
             </exclude>
           </excludes>
         </configuration>
+      </plugin>
+
+      <!-- Jacoco Plugin for Coverage -->
+      <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>0.8.11</version>
+          <executions>
+              <execution>
+                  <goals>
+                      <goal>prepare-agent</goal>
+                  </goals>
+                  <configuration>
+                      <destFile>${project.build.directory}/coverage-reports/jacoco-ut.exec</destFile>
+                  </configuration>
+              </execution>
+              <!-- Generate HTML report -->
+              <execution>
+                  <id>report</id>
+                  <phase>verify</phase>
+                  <goals>
+                      <goal>report</goal>
+                  </goals>
+                  <configuration>
+                      <dataFile>${project.build.directory}/coverage-reports/jacoco-ut.exec</dataFile>
+                      <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
+                  </configuration>
+              </execution>
+          </executions>
       </plugin>
     </plugins>
   </build>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Shopp-E Order Service</a> &gt; <a href="index.source.html" class="el_package">com.shoppe.order.controller</a> &gt; <span class="el_source">OrderController.java</span></div><h1>OrderController.java</h1><pre class="source lang-java linenums">package com.shoppe.order.controller;
+
+import com.shoppe.order.dto.*;
+import com.shoppe.order.service.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+<span class="nc" id="L15">@RequiredArgsConstructor</span>
+@CrossOrigin(origins = &quot;*&quot;)
+public class OrderController {
+
+    private final OrderService orderService;
+
+    // Resolve userId from X-Auth-UserId header (set by gateway or auth lookup)
+    // For simplicity, userId is passed as a header X-Auth-UserId from gateway
+    // In production, parse from JWT claims forwarded by gateway
+
+    // ── Cart ────────────────────────────────
+
+    @GetMapping(&quot;/api/cart&quot;)
+    @Operation(summary = &quot;Get cart items for authenticated user&quot;)
+    public ResponseEntity&lt;List&lt;CartItemDto&gt;&gt; getCart(@RequestHeader(&quot;X-Auth-UserId&quot;) Long userId) {
+<span class="nc" id="L30">        return ResponseEntity.ok(orderService.getCart(userId));</span>
+    }
+
+    @PostMapping(&quot;/api/cart/{productId}&quot;)
+    @Operation(summary = &quot;Add product to cart&quot;)
+    public ResponseEntity&lt;CartItemDto&gt; addToCart(
+            @RequestHeader(&quot;X-Auth-UserId&quot;) Long userId,
+            @PathVariable Long productId,
+            @RequestParam(defaultValue = &quot;1&quot;) Integer quantity) {
+<span class="nc" id="L39">        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.addToCart(userId, productId, quantity));</span>
+    }
+
+    @PutMapping(&quot;/api/cart/{cartItemId}&quot;)
+    public ResponseEntity&lt;CartItemDto&gt; updateCart(
+            @PathVariable Long cartItemId,
+            @RequestParam Integer quantity) {
+<span class="nc" id="L46">        CartItemDto result = orderService.updateCartItem(cartItemId, quantity);</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        return result != null ? ResponseEntity.ok(result) : ResponseEntity.noContent().build();</span>
+    }
+
+    @DeleteMapping(&quot;/api/cart/{cartItemId}&quot;)
+    public ResponseEntity&lt;Void&gt; removeFromCart(@PathVariable Long cartItemId) {
+<span class="nc" id="L52">        orderService.removeFromCart(cartItemId);</span>
+<span class="nc" id="L53">        return ResponseEntity.noContent().build();</span>
+    }
+
+    @DeleteMapping(&quot;/api/cart&quot;)
+    public ResponseEntity&lt;Void&gt; clearCart(@RequestHeader(&quot;X-Auth-UserId&quot;) Long userId) {
+<span class="nc" id="L58">        orderService.clearCart(userId);</span>
+<span class="nc" id="L59">        return ResponseEntity.noContent().build();</span>
+    }
+
+    // ── Wishlist ─────────────────────────────
+
+    @GetMapping(&quot;/api/wishlist&quot;)
+    public ResponseEntity&lt;List&lt;ProductDto&gt;&gt; getWishlist(@RequestHeader(&quot;X-Auth-UserId&quot;) Long userId) {
+<span class="nc" id="L66">        return ResponseEntity.ok(orderService.getWishlist(userId));</span>
+    }
+
+    @PostMapping(&quot;/api/wishlist/{productId}&quot;)
+    public ResponseEntity&lt;Void&gt; addToWishlist(
+            @RequestHeader(&quot;X-Auth-UserId&quot;) Long userId,
+            @PathVariable Long productId) {
+<span class="nc" id="L73">        orderService.addToWishlist(userId, productId);</span>
+<span class="nc" id="L74">        return ResponseEntity.status(HttpStatus.CREATED).build();</span>
+    }
+
+    @DeleteMapping(&quot;/api/wishlist/{productId}&quot;)
+    public ResponseEntity&lt;Void&gt; removeFromWishlist(
+            @RequestHeader(&quot;X-Auth-UserId&quot;) Long userId,
+            @PathVariable Long productId) {
+<span class="nc" id="L81">        orderService.removeFromWishlist(userId, productId);</span>
+<span class="nc" id="L82">        return ResponseEntity.noContent().build();</span>
+    }
+
+    // ── Compare ─────────────────────────────
+
+    @GetMapping(&quot;/api/compare&quot;)
+    @Operation(summary = &quot;Get compare list for authenticated user&quot;)
+    public ResponseEntity&lt;List&lt;ProductDto&gt;&gt; getCompareItems(@RequestHeader(&quot;X-Auth-UserId&quot;) Long userId) {
+<span class="nc" id="L90">        return ResponseEntity.ok(orderService.getCompareItems(userId));</span>
+    }
+
+    @PostMapping(&quot;/api/compare/{productId}&quot;)
+    @Operation(summary = &quot;Add product to compare list (max 4)&quot;)
+    public ResponseEntity&lt;Void&gt; addToCompare(
+            @RequestHeader(&quot;X-Auth-UserId&quot;) Long userId,
+            @PathVariable Long productId) {
+<span class="nc" id="L98">        orderService.addToCompare(userId, productId);</span>
+<span class="nc" id="L99">        return ResponseEntity.status(HttpStatus.CREATED).build();</span>
+    }
+
+    @DeleteMapping(&quot;/api/compare/{productId}&quot;)
+    @Operation(summary = &quot;Remove product from compare list&quot;)
+    public ResponseEntity&lt;Void&gt; removeFromCompare(
+            @RequestHeader(&quot;X-Auth-UserId&quot;) Long userId,
+            @PathVariable Long productId) {
+<span class="nc" id="L107">        orderService.removeFromCompare(userId, productId);</span>
+<span class="nc" id="L108">        return ResponseEntity.noContent().build();</span>
+    }
+
+    // ── Orders ───────────────────────────────
+
+    @PostMapping(&quot;/api/orders/create-checkout-session&quot;)
+    @Operation(summary = &quot;Create Stripe Checkout Session&quot;)
+    public ResponseEntity&lt;CheckoutSessionResponse&gt; createCheckoutSession(
+            @RequestHeader(&quot;X-Auth-UserId&quot;) Long userId,
+            @RequestBody Map&lt;String, String&gt; body) {
+<span class="nc" id="L118">        String shippingAddress = body.getOrDefault(&quot;shippingAddress&quot;, &quot;&quot;);</span>
+<span class="nc" id="L119">        return ResponseEntity.ok(orderService.createCheckoutSession(userId, shippingAddress));</span>
+    }
+
+    @PostMapping(&quot;/api/orders/confirm-checkout&quot;)
+    @Operation(summary = &quot;Confirm Stripe Checkout Session and finalize order&quot;)
+    public ResponseEntity&lt;OrderDto&gt; confirmCheckout(
+            @RequestHeader(&quot;X-Auth-UserId&quot;) Long userId,
+            @RequestParam(&quot;session_id&quot;) String sessionId) {
+<span class="nc" id="L127">        return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="nc" id="L128">                .body(orderService.confirmCheckoutSession(sessionId, userId));</span>
+    }
+
+    @GetMapping(&quot;/api/orders&quot;)
+    public ResponseEntity&lt;List&lt;OrderDto&gt;&gt; getMyOrders(@RequestHeader(&quot;X-Auth-UserId&quot;) Long userId) {
+<span class="nc" id="L133">        return ResponseEntity.ok(orderService.getUserOrders(userId));</span>
+    }
+
+    @GetMapping(&quot;/api/orders/{id}&quot;)
+    public ResponseEntity&lt;OrderDto&gt; getOrderById(@PathVariable Long id) {
+<span class="nc" id="L138">        return ResponseEntity.ok(orderService.getOrderById(id));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

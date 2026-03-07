@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Shopp-E Product Service</a> &gt; <a href="index.source.html" class="el_package">com.shoppe.product.service</a> &gt; <span class="el_source">ProductServiceImpl.java</span></div><h1>ProductServiceImpl.java</h1><pre class="source lang-java linenums">package com.shoppe.product.service;
+
+import com.shoppe.product.dto.ProductDto;
+import com.shoppe.product.exception.ResourceNotFoundException;
+import com.shoppe.product.model.Category;
+import com.shoppe.product.model.Product;
+import com.shoppe.product.repository.CategoryRepository;
+import com.shoppe.product.repository.ProductRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import com.shoppe.product.dto.FakeStoreProductDto;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class ProductServiceImpl implements ProductService {
+
+    private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
+
+    @Override
+    public List&lt;ProductDto&gt; getAllProducts() {
+<span class="nc" id="L26">        return productRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());</span>
+    }
+
+    @Override
+    public ProductDto getProductById(Long id) {
+        try {
+<span class="nc" id="L32">            return toDto(productRepository.findById(id)</span>
+<span class="nc" id="L33">                    .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Product not found with id: &quot; + id)));</span>
+<span class="nc" id="L34">        } catch (ResourceNotFoundException e) {</span>
+            // Fetch dynamically from FakeStore API
+            try {
+<span class="nc" id="L37">                RestTemplate restTemplate = new RestTemplate();</span>
+<span class="nc" id="L38">                String fakeStoreUrl = &quot;https://fakestoreapi.com/products/&quot; + id;</span>
+<span class="nc" id="L39">                FakeStoreProductDto fakeProduct = restTemplate.getForObject(fakeStoreUrl, FakeStoreProductDto.class);</span>
+
+<span class="nc bnc" id="L41" title="All 2 branches missed.">                if (fakeProduct != null) {</span>
+<span class="nc" id="L42">                    ProductDto mockDto = new ProductDto();</span>
+<span class="nc" id="L43">                    mockDto.setId(fakeProduct.getId());</span>
+<span class="nc" id="L44">                    mockDto.setName(fakeProduct.getTitle());</span>
+<span class="nc" id="L45">                    mockDto.setDescription(fakeProduct.getDescription());</span>
+<span class="nc" id="L46">                    mockDto.setPrice(fakeProduct.getPrice());</span>
+<span class="nc" id="L47">                    mockDto.setStock(100);</span>
+<span class="nc" id="L48">                    mockDto.setCategoryId(1L);</span>
+<span class="nc" id="L49">                    mockDto.setCategoryName(fakeProduct.getCategory());</span>
+<span class="nc" id="L50">                    mockDto.setRetailerId(1L);</span>
+<span class="nc" id="L51">                    mockDto.setImageUrl(fakeProduct.getImage());</span>
+<span class="nc" id="L52">                    return mockDto;</span>
+                }
+<span class="nc" id="L54">            } catch (Exception ex) {</span>
+                // Fallback mock
+            }
+
+<span class="nc" id="L58">            ProductDto fallbackDto = new ProductDto();</span>
+<span class="nc" id="L59">            fallbackDto.setId(id);</span>
+<span class="nc" id="L60">            fallbackDto.setName(&quot;FakeStore Product &quot; + id);</span>
+<span class="nc" id="L61">            fallbackDto.setDescription(&quot;Mocked product&quot;);</span>
+<span class="nc" id="L62">            fallbackDto.setPrice(java.math.BigDecimal.valueOf(19.99));</span>
+<span class="nc" id="L63">            fallbackDto.setStock(100);</span>
+<span class="nc" id="L64">            return fallbackDto;</span>
+        }
+    }
+
+    @Override
+    @Transactional
+    public ProductDto createProduct(ProductDto dto) {
+<span class="nc" id="L71">        Product product = fromDto(dto);</span>
+<span class="nc" id="L72">        return toDto(productRepository.save(product));</span>
+    }
+
+    @Override
+    @Transactional
+    public ProductDto updateProduct(Long id, ProductDto dto) {
+<span class="nc" id="L78">        Product product = productRepository.findById(id)</span>
+<span class="nc" id="L79">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Product not found with id: &quot; + id));</span>
+<span class="nc" id="L80">        product.setName(dto.getName());</span>
+<span class="nc" id="L81">        product.setDescription(dto.getDescription());</span>
+<span class="nc" id="L82">        product.setPrice(dto.getPrice());</span>
+<span class="nc" id="L83">        product.setStock(dto.getStock());</span>
+<span class="nc" id="L84">        product.setImageUrl(dto.getImageUrl());</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        if (dto.getCategoryId() != null) {</span>
+<span class="nc" id="L86">            Category category = categoryRepository.findById(dto.getCategoryId())</span>
+<span class="nc" id="L87">                    .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Category not found&quot;));</span>
+<span class="nc" id="L88">            product.setCategory(category);</span>
+        }
+<span class="nc" id="L90">        return toDto(productRepository.save(product));</span>
+    }
+
+    @Override
+    @Transactional
+    public void deleteProduct(Long id) {
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        if (!productRepository.existsById(id)) {</span>
+<span class="nc" id="L97">            throw new ResourceNotFoundException(&quot;Product not found with id: &quot; + id);</span>
+        }
+<span class="nc" id="L99">        productRepository.deleteById(id);</span>
+<span class="nc" id="L100">    }</span>
+
+    @Override
+    public List&lt;ProductDto&gt; getProductsByCategory(Long categoryId) {
+<span class="nc" id="L104">        return productRepository.findByCategoryId(categoryId).stream().map(this::toDto).collect(Collectors.toList());</span>
+    }
+
+    @Override
+    public List&lt;ProductDto&gt; getProductsByRetailer(Long retailerId) {
+<span class="nc" id="L109">        return productRepository.findByRetailerId(retailerId).stream().map(this::toDto).collect(Collectors.toList());</span>
+    }
+
+    @Override
+    public List&lt;ProductDto&gt; searchProducts(String keyword) {
+<span class="nc" id="L114">        return productRepository.findByNameContainingIgnoreCase(keyword).stream().map(this::toDto)</span>
+<span class="nc" id="L115">                .collect(Collectors.toList());</span>
+    }
+
+    @Override
+    public List&lt;ProductDto&gt; searchProductsInCategory(String keyword, Long categoryId) {
+<span class="nc" id="L120">        return productRepository.findByNameContainingIgnoreCaseAndCategoryId(keyword, categoryId)</span>
+<span class="nc" id="L121">                .stream().map(this::toDto).collect(Collectors.toList());</span>
+    }
+
+    private ProductDto toDto(Product p) {
+<span class="nc" id="L125">        ProductDto dto = new ProductDto();</span>
+<span class="nc" id="L126">        dto.setId(p.getId());</span>
+<span class="nc" id="L127">        dto.setName(p.getName());</span>
+<span class="nc" id="L128">        dto.setDescription(p.getDescription());</span>
+<span class="nc" id="L129">        dto.setPrice(p.getPrice());</span>
+<span class="nc" id="L130">        dto.setStock(p.getStock());</span>
+<span class="nc" id="L131">        dto.setCategoryId(p.getCategory().getId());</span>
+<span class="nc" id="L132">        dto.setCategoryName(p.getCategory().getName());</span>
+<span class="nc" id="L133">        dto.setRetailerId(p.getRetailerId());</span>
+<span class="nc" id="L134">        dto.setImageUrl(p.getImageUrl());</span>
+<span class="nc" id="L135">        return dto;</span>
+    }
+
+    private Product fromDto(ProductDto dto) {
+<span class="nc" id="L139">        Product p = new Product();</span>
+<span class="nc" id="L140">        p.setName(dto.getName());</span>
+<span class="nc" id="L141">        p.setDescription(dto.getDescription());</span>
+<span class="nc" id="L142">        p.setPrice(dto.getPrice());</span>
+<span class="nc" id="L143">        p.setStock(dto.getStock());</span>
+<span class="nc" id="L144">        p.setRetailerId(dto.getRetailerId());</span>
+<span class="nc" id="L145">        p.setImageUrl(dto.getImageUrl());</span>
+<span class="nc" id="L146">        Category category = categoryRepository.findById(dto.getCategoryId())</span>
+<span class="nc" id="L147">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Category not found&quot;));</span>
+<span class="nc" id="L148">        p.setCategory(category);</span>
+<span class="nc" id="L149">        return p;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

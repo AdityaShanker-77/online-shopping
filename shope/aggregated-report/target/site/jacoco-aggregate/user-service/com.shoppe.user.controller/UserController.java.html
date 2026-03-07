@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>UserController.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">aggregated-report</a> &gt; <a href="../index.html" class="el_bundle">user-service</a> &gt; <a href="index.source.html" class="el_package">com.shoppe.user.controller</a> &gt; <span class="el_source">UserController.java</span></div><h1>UserController.java</h1><pre class="source lang-java linenums">package com.shoppe.user.controller;
+
+import com.shoppe.user.dto.UserProfileDto;
+import com.shoppe.user.model.UserProfile;
+import com.shoppe.user.repository.UserProfileRepository;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Base64;
+import java.util.Map;
+
+@RestController
+@RequestMapping(&quot;/api/users&quot;)
+@RequiredArgsConstructor
+@CrossOrigin(origins = &quot;*&quot;)
+public class UserController {
+
+    private final UserProfileRepository userProfileRepository;
+
+    @GetMapping(&quot;/me&quot;)
+    public ResponseEntity&lt;UserProfileDto&gt; getMyProfile(
+            @RequestHeader(&quot;X-Auth-User&quot;) String email,
+            @RequestHeader(value = &quot;X-Auth-UserId&quot;, required = false) String userIdStr,
+            @RequestHeader(value = &quot;X-Auth-Name&quot;, required = false) String nameStr) {
+
+<span class="nc" id="L30">        Long userId = parseUserId(userIdStr);</span>
+<span class="nc" id="L31">        UserProfile profile = userProfileRepository.findByEmail(email)</span>
+<span class="nc" id="L32">                .orElseGet(() -&gt; {</span>
+<span class="nc" id="L33">                    UserProfile p = new UserProfile();</span>
+<span class="nc" id="L34">                    p.setEmail(email);</span>
+<span class="nc" id="L35">                    p.setUserId(userId);</span>
+<span class="nc" id="L36">                    p.setFullName(nameStr);</span>
+<span class="nc" id="L37">                    return userProfileRepository.save(p);</span>
+                });
+        // If profile exists but userId was null (old profile), update it
+<span class="nc bnc" id="L40" title="All 4 branches missed.">        if (profile.getUserId() == null &amp;&amp; userId != null) {</span>
+<span class="nc" id="L41">            profile.setUserId(userId);</span>
+<span class="nc" id="L42">            profile = userProfileRepository.save(profile);</span>
+        }
+        // If profile exists but name is null, sync it from the JWT
+<span class="nc bnc" id="L45" title="All 6 branches missed.">        if ((profile.getFullName() == null || profile.getFullName().isEmpty()) &amp;&amp; nameStr != null</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">                &amp;&amp; !nameStr.isEmpty()) {</span>
+<span class="nc" id="L47">            profile.setFullName(nameStr);</span>
+<span class="nc" id="L48">            profile = userProfileRepository.save(profile);</span>
+        }
+<span class="nc" id="L50">        return ResponseEntity.ok(toDto(profile));</span>
+    }
+
+    @PutMapping(&quot;/me&quot;)
+    public ResponseEntity&lt;UserProfileDto&gt; updateProfile(
+            @RequestHeader(&quot;X-Auth-User&quot;) String email,
+            @RequestHeader(value = &quot;X-Auth-UserId&quot;, required = false) String userIdStr,
+            @Valid @RequestBody UserProfileDto dto) {
+<span class="nc" id="L58">        Long userId = parseUserId(userIdStr);</span>
+<span class="nc" id="L59">        UserProfile profile = userProfileRepository.findByEmail(email)</span>
+<span class="nc" id="L60">                .orElseGet(() -&gt; {</span>
+<span class="nc" id="L61">                    UserProfile p = new UserProfile();</span>
+<span class="nc" id="L62">                    p.setEmail(email);</span>
+<span class="nc" id="L63">                    p.setUserId(userId);</span>
+<span class="nc" id="L64">                    return p;</span>
+                });
+<span class="nc" id="L66">        profile.setFullName(dto.getFullName());</span>
+<span class="nc" id="L67">        profile.setPhone(dto.getPhone());</span>
+<span class="nc" id="L68">        profile.setAddress(dto.getAddress());</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        if (dto.getProfilePictureUrl() != null)</span>
+<span class="nc" id="L70">            profile.setProfilePictureUrl(dto.getProfilePictureUrl());</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if (profile.getUserId() == null)</span>
+<span class="nc" id="L72">            profile.setUserId(userId);</span>
+<span class="nc" id="L73">        return ResponseEntity.ok(toDto(userProfileRepository.save(profile)));</span>
+    }
+
+    @PostMapping(&quot;/me/picture&quot;)
+    public ResponseEntity&lt;?&gt; uploadProfilePicture(
+            @RequestHeader(&quot;X-Auth-User&quot;) String email,
+            @RequestParam(&quot;file&quot;) MultipartFile file) throws IOException {
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        if (file.getSize() &gt; 2 * 1024 * 1024) {</span>
+<span class="nc" id="L81">            return ResponseEntity.badRequest().body(Map.of(&quot;message&quot;, &quot;File size must not exceed 2MB&quot;));</span>
+        }
+<span class="nc" id="L83">        String base64 = Base64.getEncoder().encodeToString(file.getBytes());</span>
+<span class="nc" id="L84">        String dataUrl = &quot;data:&quot; + file.getContentType() + &quot;;base64,&quot; + base64;</span>
+<span class="nc" id="L85">        UserProfile profile = userProfileRepository.findByEmail(email)</span>
+<span class="nc" id="L86">                .orElseThrow(() -&gt; new RuntimeException(&quot;Profile not found&quot;));</span>
+<span class="nc" id="L87">        profile.setProfilePictureUrl(dataUrl);</span>
+<span class="nc" id="L88">        userProfileRepository.save(profile);</span>
+<span class="nc" id="L89">        return ResponseEntity.ok(Map.of(&quot;profilePictureUrl&quot;, dataUrl));</span>
+    }
+
+    @GetMapping(&quot;/{userId}&quot;)
+    public ResponseEntity&lt;UserProfileDto&gt; getByUserId(@PathVariable Long userId) {
+<span class="nc" id="L94">        return userProfileRepository.findByUserId(userId)</span>
+<span class="nc" id="L95">                .map(p -&gt; ResponseEntity.ok(toDto(p)))</span>
+<span class="nc" id="L96">                .orElse(ResponseEntity.notFound().build());</span>
+    }
+
+    private Long parseUserId(String userIdStr) {
+        try {
+<span class="nc bnc" id="L101" title="All 4 branches missed.">            return userIdStr != null &amp;&amp; !userIdStr.isEmpty() ? Long.parseLong(userIdStr) : null;</span>
+<span class="nc" id="L102">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L103">            return null;</span>
+        }
+    }
+
+    private UserProfileDto toDto(UserProfile p) {
+<span class="nc" id="L108">        UserProfileDto dto = new UserProfileDto();</span>
+<span class="nc" id="L109">        dto.setId(p.getId());</span>
+<span class="nc" id="L110">        dto.setUserId(p.getUserId());</span>
+<span class="nc" id="L111">        dto.setFullName(p.getFullName());</span>
+<span class="nc" id="L112">        dto.setEmail(p.getEmail());</span>
+<span class="nc" id="L113">        dto.setPhone(p.getPhone());</span>
+<span class="nc" id="L114">        dto.setAddress(p.getAddress());</span>
+<span class="nc" id="L115">        dto.setProfilePictureUrl(p.getProfilePictureUrl());</span>
+<span class="nc" id="L116">        return dto;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

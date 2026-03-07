@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Order.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Shopp-E Order Service</a> &gt; <a href="index.source.html" class="el_package">com.shoppe.order.model</a> &gt; <span class="el_source">Order.java</span></div><h1>Order.java</h1><pre class="source lang-java linenums">package com.shoppe.order.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = &quot;orders&quot;)
+<span class="pc" id="L12">@Getter @Setter @NoArgsConstructor @AllArgsConstructor</span>
+public class Order {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+<span class="nc" id="L17">    private Long id;</span>
+
+    // userId from auth-service — stored as plain Long, no JPA cross-service join
+    @Column(name = &quot;user_id&quot;, nullable = false)
+<span class="nc" id="L21">    private Long userId;</span>
+
+    @Column(name = &quot;order_date&quot;, nullable = false)
+<span class="nc" id="L24">    private LocalDateTime orderDate;</span>
+
+    @Column(name = &quot;total_amount&quot;, nullable = false, precision = 12, scale = 2)
+<span class="nc" id="L27">    private BigDecimal totalAmount;</span>
+
+    @Column(nullable = false, length = 50)
+<span class="nc" id="L30">    private String status;</span>
+
+    @Column(name = &quot;shipping_address&quot;, columnDefinition = &quot;TEXT&quot;)
+<span class="nc" id="L33">    private String shippingAddress;</span>
+
+<span class="pc" id="L35">    @OneToMany(mappedBy = &quot;order&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+<span class="nc" id="L36">    private List&lt;OrderItem&gt; orderItems = new ArrayList&lt;&gt;();</span>
+
+    @PrePersist
+<span class="nc" id="L39">    protected void onCreate() { orderDate = LocalDateTime.now(); }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

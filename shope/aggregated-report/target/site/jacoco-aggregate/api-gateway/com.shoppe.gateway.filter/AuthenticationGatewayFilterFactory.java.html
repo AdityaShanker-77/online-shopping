@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>AuthenticationGatewayFilterFactory.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">aggregated-report</a> &gt; <a href="../index.html" class="el_bundle">api-gateway</a> &gt; <a href="index.source.html" class="el_package">com.shoppe.gateway.filter</a> &gt; <span class="el_source">AuthenticationGatewayFilterFactory.java</span></div><h1>AuthenticationGatewayFilterFactory.java</h1><pre class="source lang-java linenums">package com.shoppe.gateway.filter;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.gateway.filter.GatewayFilter;
+import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
+
+@Component
+public class AuthenticationGatewayFilterFactory
+        extends AbstractGatewayFilterFactory&lt;AuthenticationGatewayFilterFactory.Config&gt; {
+
+    @Value(&quot;${shoppe.jwt.secret}&quot;)
+    private String jwtSecret;
+
+    public AuthenticationGatewayFilterFactory() {
+<span class="nc" id="L28">        super(Config.class);</span>
+<span class="nc" id="L29">    }</span>
+
+    @Override
+    public GatewayFilter apply(Config config) {
+<span class="nc" id="L33">        return (exchange, chain) -&gt; {</span>
+<span class="nc" id="L34">            ServerHttpRequest request = exchange.getRequest();</span>
+
+<span class="nc bnc" id="L36" title="All 2 branches missed.">            if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {</span>
+<span class="nc" id="L37">                return onError(exchange, &quot;No Authorization header&quot;, HttpStatus.UNAUTHORIZED);</span>
+            }
+
+<span class="nc" id="L40">            String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);</span>
+<span class="nc bnc" id="L41" title="All 4 branches missed.">            if (authHeader == null || !authHeader.startsWith(&quot;Bearer &quot;)) {</span>
+<span class="nc" id="L42">                return onError(exchange, &quot;Invalid Authorization header&quot;, HttpStatus.UNAUTHORIZED);</span>
+            }
+
+<span class="nc" id="L45">            String token = authHeader.substring(7);</span>
+            try {
+<span class="nc" id="L47">                Key key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));</span>
+<span class="nc" id="L48">                Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();</span>
+<span class="nc" id="L49">                String username = claims.getSubject();</span>
+                // Extract userId stored in JWT as claim &quot;id&quot;
+<span class="nc bnc" id="L51" title="All 2 branches missed.">                String userId = claims.get(&quot;id&quot;) != null ? claims.get(&quot;id&quot;).toString() : &quot;&quot;;</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">                String name = claims.get(&quot;name&quot;) != null ? claims.get(&quot;name&quot;).toString() : &quot;&quot;;</span>
+
+<span class="nc" id="L54">                ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()</span>
+<span class="nc" id="L55">                        .header(&quot;X-Auth-User&quot;, username)</span>
+<span class="nc" id="L56">                        .header(&quot;X-Auth-UserId&quot;, userId)</span>
+<span class="nc" id="L57">                        .header(&quot;X-Auth-Name&quot;, name)</span>
+<span class="nc" id="L58">                        .build();</span>
+<span class="nc" id="L59">                return chain.filter(exchange.mutate().request(modifiedRequest).build());</span>
+<span class="nc" id="L60">            } catch (Exception e) {</span>
+<span class="nc" id="L61">                return onError(exchange, &quot;Invalid token: &quot; + e.getMessage(), HttpStatus.UNAUTHORIZED);</span>
+            }
+        };
+    }
+
+    private Mono&lt;Void&gt; onError(ServerWebExchange exchange, String err, HttpStatus httpStatus) {
+<span class="nc" id="L67">        ServerHttpResponse response = exchange.getResponse();</span>
+<span class="nc" id="L68">        response.setStatusCode(httpStatus);</span>
+<span class="nc" id="L69">        return response.setComplete();</span>
+    }
+
+<span class="nc" id="L72">    public static class Config {</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

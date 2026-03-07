@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Shopp-E Order Service</a> &gt; <a href="index.source.html" class="el_package">com.shoppe.order.service</a> &gt; <span class="el_source">OrderService.java</span></div><h1>OrderService.java</h1><pre class="source lang-java linenums">package com.shoppe.order.service;
+
+import com.shoppe.order.client.ProductServiceClient;
+import com.shoppe.order.client.RetailerServiceClient;
+import com.shoppe.order.dto.*;
+import com.shoppe.order.model.*;
+import com.shoppe.order.repository.*;
+import com.stripe.Stripe;
+import com.stripe.model.checkout.Session;
+import com.stripe.param.checkout.SessionCreateParams;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+<span class="fc" id="L23">@RequiredArgsConstructor</span>
+public class OrderService {
+
+    private final CartItemRepository cartItemRepository;
+    private final WishlistRepository wishlistRepository;
+    private final CompareItemRepository compareItemRepository;
+    private final OrderRepository orderRepository;
+    private final ProductServiceClient productServiceClient;
+    private final RetailerServiceClient retailerServiceClient;
+
+    @Value(&quot;${stripe.secret.key}&quot;)
+    private String stripeSecretKey;
+
+    @Value(&quot;${shoppe.frontend.url:http://localhost:4200}&quot;)
+    private String frontendUrl;
+
+    // ─── Cart ────────────────────────────────────────────
+
+    public List&lt;CartItemDto&gt; getCart(Long userId) {
+<span class="fc" id="L42">        return cartItemRepository.findByUserId(userId).stream().map(this::toCartDto).collect(Collectors.toList());</span>
+    }
+
+    @Transactional
+    public CartItemDto addToCart(Long userId, Long productId, Integer quantity) {
+<span class="fc" id="L47">        ProductDto product = productServiceClient.getProductById(productId);</span>
+<span class="fc" id="L48">        Optional&lt;CartItem&gt; existing = cartItemRepository.findByUserIdAndProductId(userId, productId);</span>
+<span class="fc" id="L49">        CartItem item = existing.orElseGet(() -&gt; {</span>
+<span class="fc" id="L50">            CartItem c = new CartItem();</span>
+<span class="fc" id="L51">            c.setUserId(userId);</span>
+<span class="fc" id="L52">            c.setProductId(productId);</span>
+<span class="fc" id="L53">            c.setProductName(product.getName());</span>
+<span class="fc" id="L54">            c.setPrice(product.getPrice());</span>
+<span class="fc" id="L55">            c.setImageUrl(product.getImageUrl());</span>
+<span class="fc" id="L56">            c.setQuantity(0);</span>
+<span class="fc" id="L57">            return c;</span>
+        });
+<span class="fc" id="L59">        item.setQuantity(item.getQuantity() + quantity);</span>
+<span class="fc" id="L60">        return toCartDto(cartItemRepository.save(item));</span>
+    }
+
+    @Transactional
+    public CartItemDto updateCartItem(Long cartItemId, Integer quantity) {
+<span class="nc" id="L65">        CartItem item = cartItemRepository.findById(cartItemId)</span>
+<span class="nc" id="L66">                .orElseThrow(() -&gt; new RuntimeException(&quot;Cart item not found&quot;));</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        if (quantity &lt;= 0) {</span>
+<span class="nc" id="L68">            cartItemRepository.delete(item);</span>
+<span class="nc" id="L69">            return null;</span>
+        }
+<span class="nc" id="L71">        item.setQuantity(quantity);</span>
+<span class="nc" id="L72">        return toCartDto(cartItemRepository.save(item));</span>
+    }
+
+    @Transactional
+    public void removeFromCart(Long cartItemId) {
+<span class="nc" id="L77">        cartItemRepository.deleteById(cartItemId);</span>
+<span class="nc" id="L78">    }</span>
+
+    @Transactional
+    public void clearCart(Long userId) {
+<span class="fc" id="L82">        cartItemRepository.deleteByUserId(userId);</span>
+<span class="fc" id="L83">    }</span>
+
+    // ─── Wishlist ─────────────────────────────────────────
+
+    public List&lt;ProductDto&gt; getWishlist(Long userId) {
+<span class="nc" id="L88">        return wishlistRepository.findByUserId(userId).stream().map(w -&gt; {</span>
+<span class="nc" id="L89">            ProductDto dto = new ProductDto();</span>
+<span class="nc" id="L90">            dto.setId(w.getProductId());</span>
+<span class="nc" id="L91">            dto.setName(w.getProductName());</span>
+<span class="nc" id="L92">            dto.setImageUrl(w.getImageUrl());</span>
+<span class="nc" id="L93">            return dto;</span>
+<span class="nc" id="L94">        }).collect(Collectors.toList());</span>
+    }
+
+    @Transactional
+    public void addToWishlist(Long userId, Long productId) {
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        if (wishlistRepository.findByUserIdAndProductId(userId, productId).isEmpty()) {</span>
+<span class="nc" id="L100">            ProductDto product = productServiceClient.getProductById(productId);</span>
+<span class="nc" id="L101">            Wishlist w = new Wishlist();</span>
+<span class="nc" id="L102">            w.setUserId(userId);</span>
+<span class="nc" id="L103">            w.setProductId(productId);</span>
+<span class="nc" id="L104">            w.setProductName(product.getName());</span>
+<span class="nc" id="L105">            w.setImageUrl(product.getImageUrl());</span>
+<span class="nc" id="L106">            wishlistRepository.save(w);</span>
+        }
+<span class="nc" id="L108">    }</span>
+
+    @Transactional
+    public void removeFromWishlist(Long userId, Long productId) {
+<span class="nc" id="L112">        wishlistRepository.findByUserIdAndProductId(userId, productId).ifPresent(wishlistRepository::delete);</span>
+<span class="nc" id="L113">    }</span>
+
+    // ─── Compare ─────────────────────────────────────────
+
+    public List&lt;ProductDto&gt; getCompareItems(Long userId) {
+<span class="nc" id="L118">        return compareItemRepository.findByUserId(userId).stream().map(c -&gt; {</span>
+<span class="nc" id="L119">            ProductDto dto = new ProductDto();</span>
+<span class="nc" id="L120">            dto.setId(c.getProductId());</span>
+<span class="nc" id="L121">            dto.setName(c.getProductName());</span>
+<span class="nc" id="L122">            dto.setImageUrl(c.getImageUrl());</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">            dto.setPrice(c.getPrice() != null ? BigDecimal.valueOf(c.getPrice()) : BigDecimal.ZERO);</span>
+<span class="nc" id="L124">            dto.setCategoryName(c.getCategory());</span>
+<span class="nc" id="L125">            return dto;</span>
+<span class="nc" id="L126">        }).collect(Collectors.toList());</span>
+    }
+
+    @Transactional
+    public void addToCompare(Long userId, Long productId) {
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        if (compareItemRepository.findByUserIdAndProductId(userId, productId).isPresent()) {</span>
+<span class="nc" id="L132">            return; // already in compare list</span>
+        }
+<span class="nc bnc" id="L134" title="All 2 branches missed.">        if (compareItemRepository.countByUserId(userId) &gt;= 4) {</span>
+<span class="nc" id="L135">            throw new RuntimeException(&quot;Maximum 4 products can be compared at once&quot;);</span>
+        }
+<span class="nc" id="L137">        ProductDto product = productServiceClient.getProductById(productId);</span>
+<span class="nc" id="L138">        CompareItem c = new CompareItem();</span>
+<span class="nc" id="L139">        c.setUserId(userId);</span>
+<span class="nc" id="L140">        c.setProductId(productId);</span>
+<span class="nc" id="L141">        c.setProductName(product.getName());</span>
+<span class="nc" id="L142">        c.setImageUrl(product.getImageUrl());</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">        c.setPrice(product.getPrice() != null ? product.getPrice().doubleValue() : 0);</span>
+<span class="nc" id="L144">        c.setCategory(product.getCategoryName());</span>
+<span class="nc" id="L145">        compareItemRepository.save(c);</span>
+<span class="nc" id="L146">    }</span>
+
+    @Transactional
+    public void removeFromCompare(Long userId, Long productId) {
+<span class="nc" id="L150">        compareItemRepository.findByUserIdAndProductId(userId, productId).ifPresent(compareItemRepository::delete);</span>
+<span class="nc" id="L151">    }</span>
+
+    // ─── Stripe Checkout Session ──────────────────────────
+
+    public CheckoutSessionResponse createCheckoutSession(Long userId, String shippingAddress) {
+        try {
+<span class="nc" id="L157">            Stripe.apiKey = this.stripeSecretKey;</span>
+
+<span class="nc" id="L159">            List&lt;CartItem&gt; cartItems = cartItemRepository.findByUserId(userId);</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">            if (cartItems.isEmpty()) {</span>
+<span class="nc" id="L161">                throw new RuntimeException(&quot;Cart is empty&quot;);</span>
+            }
+
+<span class="nc" id="L164">            List&lt;SessionCreateParams.LineItem&gt; lineItems = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">            for (CartItem item : cartItems) {</span>
+<span class="nc" id="L166">                long unitAmountInCents = item.getPrice().multiply(BigDecimal.valueOf(100)).longValue();</span>
+<span class="nc" id="L167">                lineItems.add(</span>
+<span class="nc" id="L168">                        SessionCreateParams.LineItem.builder()</span>
+<span class="nc" id="L169">                                .setQuantity((long) item.getQuantity())</span>
+<span class="nc" id="L170">                                .setPriceData(</span>
+<span class="nc" id="L171">                                        SessionCreateParams.LineItem.PriceData.builder()</span>
+<span class="nc" id="L172">                                                .setCurrency(&quot;usd&quot;)</span>
+<span class="nc" id="L173">                                                .setUnitAmount(unitAmountInCents)</span>
+<span class="nc" id="L174">                                                .setProductData(</span>
+<span class="nc" id="L175">                                                        SessionCreateParams.LineItem.PriceData.ProductData.builder()</span>
+<span class="nc" id="L176">                                                                .setName(item.getProductName())</span>
+<span class="nc" id="L177">                                                                .build())</span>
+<span class="nc" id="L178">                                                .build())</span>
+<span class="nc" id="L179">                                .build());</span>
+<span class="nc" id="L180">            }</span>
+
+<span class="nc" id="L182">            SessionCreateParams params = SessionCreateParams.builder()</span>
+<span class="nc" id="L183">                    .setMode(SessionCreateParams.Mode.PAYMENT)</span>
+<span class="nc" id="L184">                    .setSuccessUrl(frontendUrl + &quot;/order/checkout-success?session_id={CHECKOUT_SESSION_ID}&quot;)</span>
+<span class="nc" id="L185">                    .setCancelUrl(frontendUrl + &quot;/order/cart&quot;)</span>
+<span class="nc" id="L186">                    .addAllLineItem(lineItems)</span>
+<span class="nc" id="L187">                    .putMetadata(&quot;userId&quot;, userId.toString())</span>
+<span class="nc" id="L188">                    .putMetadata(&quot;shippingAddress&quot;, shippingAddress)</span>
+<span class="nc" id="L189">                    .build();</span>
+
+<span class="nc" id="L191">            Session session = Session.create(params);</span>
+<span class="nc" id="L192">            return new CheckoutSessionResponse(session.getUrl());</span>
+<span class="nc" id="L193">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L194">            throw e;</span>
+<span class="nc" id="L195">        } catch (Exception e) {</span>
+<span class="nc" id="L196">            throw new RuntimeException(&quot;Failed to create Stripe Checkout Session&quot;, e);</span>
+        }
+    }
+
+    @Transactional
+    public OrderDto confirmCheckoutSession(String sessionId, Long userId) {
+        try {
+<span class="nc" id="L203">            Stripe.apiKey = this.stripeSecretKey;</span>
+<span class="nc" id="L204">            Session session = Session.retrieve(sessionId);</span>
+
+<span class="nc bnc" id="L206" title="All 2 branches missed.">            if (!&quot;paid&quot;.equals(session.getPaymentStatus())) {</span>
+<span class="nc" id="L207">                throw new RuntimeException(&quot;Payment not completed&quot;);</span>
+            }
+
+<span class="nc" id="L210">            String shippingAddress = session.getMetadata().getOrDefault(&quot;shippingAddress&quot;, &quot;&quot;);</span>
+<span class="nc" id="L211">            return checkout(userId, shippingAddress);</span>
+<span class="nc" id="L212">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L213">            throw e;</span>
+<span class="nc" id="L214">        } catch (Exception e) {</span>
+<span class="nc" id="L215">            throw new RuntimeException(&quot;Failed to confirm checkout session&quot;, e);</span>
+        }
+    }
+
+    @Transactional
+    public OrderDto checkout(Long userId, String shippingAddress) {
+<span class="fc" id="L221">        List&lt;CartItem&gt; cartItems = cartItemRepository.findByUserId(userId);</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        if (cartItems.isEmpty())</span>
+<span class="fc" id="L223">            throw new RuntimeException(&quot;Cart is empty&quot;);</span>
+
+<span class="fc" id="L225">        Order order = new Order();</span>
+<span class="fc" id="L226">        order.setUserId(userId);</span>
+<span class="fc" id="L227">        order.setShippingAddress(shippingAddress);</span>
+<span class="fc" id="L228">        order.setStatus(&quot;PENDING&quot;);</span>
+<span class="fc" id="L229">        BigDecimal total = BigDecimal.ZERO;</span>
+
+<span class="pc bpc" id="L231" title="1 of 2 branches missed.">        for (CartItem item : cartItems) {</span>
+<span class="fc" id="L232">            ProductDto product = productServiceClient.getProductById(item.getProductId());</span>
+
+            // Deduct stock via Feign — best-effort for products not in local DB (e.g.
+            // FakeStore)
+            try {
+<span class="pc bpc" id="L237" title="1 of 2 branches missed.">                if (product.getStock() &lt; item.getQuantity()) {</span>
+<span class="fc" id="L238">                    throw new RuntimeException(&quot;Insufficient stock for: &quot; + product.getName());</span>
+                }
+<span class="nc" id="L240">                product.setStock(product.getStock() - item.getQuantity());</span>
+<span class="nc" id="L241">                productServiceClient.updateProduct(product.getId(), product);</span>
+<span class="nc" id="L242">            } catch (feign.FeignException.NotFound e) {</span>
+                // Product exists via FakeStore fallback but not in local DB — skip stock
+                // deduction
+<span class="nc" id="L245">            }</span>
+
+            // Update retailer revenue
+<span class="nc bnc" id="L248" title="All 2 branches missed.">            if (product.getRetailerId() != null) {</span>
+<span class="nc" id="L249">                BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));</span>
+                try {
+<span class="nc" id="L251">                    retailerServiceClient.addRevenue(product.getRetailerId(), itemTotal);</span>
+<span class="nc" id="L252">                } catch (Exception e) {</span>
+<span class="nc" id="L253">                    System.err.println(</span>
+<span class="nc" id="L254">                            &quot;Failed to update revenue for retailer &quot; + product.getRetailerId() + &quot;: &quot; + e.getMessage());</span>
+<span class="nc" id="L255">                }</span>
+            }
+
+<span class="nc" id="L258">            OrderItem oi = new OrderItem();</span>
+<span class="nc" id="L259">            oi.setOrder(order);</span>
+<span class="nc" id="L260">            oi.setProductId(product.getId());</span>
+<span class="nc" id="L261">            oi.setProductName(product.getName());</span>
+<span class="nc" id="L262">            oi.setQuantity(item.getQuantity());</span>
+<span class="nc" id="L263">            oi.setPriceAtPurchase(product.getPrice());</span>
+<span class="nc" id="L264">            order.getOrderItems().add(oi);</span>
+<span class="nc" id="L265">            total = total.add(product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));</span>
+<span class="nc" id="L266">        }</span>
+<span class="nc" id="L267">        order.setStatus(&quot;COMPLETED&quot;);</span>
+<span class="nc" id="L268">        order.setTotalAmount(total);</span>
+<span class="nc" id="L269">        Order saved = orderRepository.save(order);</span>
+<span class="nc" id="L270">        cartItemRepository.deleteByUserId(userId);</span>
+<span class="nc" id="L271">        return toOrderDto(saved);</span>
+    }
+
+    public List&lt;OrderDto&gt; getUserOrders(Long userId) {
+<span class="nc" id="L275">        return orderRepository.findByUserId(userId).stream().map(this::toOrderDto).collect(Collectors.toList());</span>
+    }
+
+    public OrderDto getOrderById(Long orderId) {
+<span class="nc" id="L279">        return toOrderDto(orderRepository.findById(orderId)</span>
+<span class="nc" id="L280">                .orElseThrow(() -&gt; new RuntimeException(&quot;Order not found&quot;)));</span>
+    }
+
+    // ─── Mappers ──────────────────────────────────────────
+
+    private CartItemDto toCartDto(CartItem item) {
+<span class="fc" id="L286">        CartItemDto dto = new CartItemDto();</span>
+<span class="fc" id="L287">        dto.setId(item.getId());</span>
+<span class="fc" id="L288">        dto.setProductId(item.getProductId());</span>
+<span class="fc" id="L289">        dto.setProductName(item.getProductName());</span>
+<span class="fc" id="L290">        dto.setPrice(item.getPrice());</span>
+<span class="fc" id="L291">        dto.setQuantity(item.getQuantity());</span>
+<span class="fc" id="L292">        dto.setImageUrl(item.getImageUrl());</span>
+<span class="fc" id="L293">        return dto;</span>
+    }
+
+    private OrderDto toOrderDto(Order order) {
+<span class="nc" id="L297">        OrderDto dto = new OrderDto();</span>
+<span class="nc" id="L298">        dto.setId(order.getId());</span>
+<span class="nc" id="L299">        dto.setUserId(order.getUserId());</span>
+<span class="nc" id="L300">        dto.setOrderDate(order.getOrderDate());</span>
+<span class="nc" id="L301">        dto.setStatus(order.getStatus());</span>
+<span class="nc" id="L302">        dto.setTotalAmount(order.getTotalAmount());</span>
+<span class="nc" id="L303">        dto.setShippingAddress(order.getShippingAddress());</span>
+<span class="nc" id="L304">        dto.setItems(order.getOrderItems().stream().map(item -&gt; {</span>
+<span class="nc" id="L305">            OrderItemDto i = new OrderItemDto();</span>
+<span class="nc" id="L306">            i.setProductId(item.getProductId());</span>
+<span class="nc" id="L307">            i.setProductName(item.getProductName());</span>
+<span class="nc" id="L308">            i.setQuantity(item.getQuantity());</span>
+<span class="nc" id="L309">            i.setPriceAtPurchase(item.getPriceAtPurchase());</span>
+<span class="nc" id="L310">            return i;</span>
+<span class="nc" id="L311">        }).collect(Collectors.toList()));</span>
+<span class="nc" id="L312">        return dto;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

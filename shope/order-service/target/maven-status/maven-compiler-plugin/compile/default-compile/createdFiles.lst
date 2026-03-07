@@ -16,6 +16,5 @@ com\shoppe\order\controller\OrderController.class
 com\shoppe\order\repository\CompareItemRepository.class
 com\shoppe\order\model\Order.class
 com\shoppe\order\dto\CheckoutSessionResponse.class
-com\shoppe\order\service\OrderService.class
 com\shoppe\order\dto\CartItemDto.class
 com\shoppe\order\repository\WishlistRepository.class
