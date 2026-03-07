@@ -8,7 +8,6 @@ com\shoppe\product\exception\GlobalExceptionHandler.class
 com\shoppe\product\dto\ReactBdProductDto$ProductListResponse.class
 com\shoppe\product\service\DataImportService.class
 com\shoppe\product\dto\CategoryDto.class
-com\shoppe\product\dto\EscuelaProductDto$EscuelaCategoryDto.class
 com\shoppe\product\dto\ReactBdProductDto.class
 com\shoppe\product\dto\FakeStoreProductDto$Rating.class
 com\shoppe\product\controller\CategoryController.class
@@ -16,7 +15,6 @@ com\shoppe\product\service\ProductService.class
 com\shoppe\product\model\Product.class
 com\shoppe\product\repository\CategoryRepository.class
 com\shoppe\product\controller\ImageProxyController.class
-com\shoppe\product\dto\EscuelaProductDto.class
 com\shoppe\product\dto\ProductDto.class
 com\shoppe\product\service\ProductServiceImpl.class
 com\shoppe\product\model\Category.class

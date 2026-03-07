@@ -69,9 +69,12 @@ class ProductServiceTest {
     }
 
     @Test
-    void getProductById_whenNotExists_shouldThrowException() {
+    void getProductById_whenNotExists_shouldReturnFallbackDto() {
         when(productRepository.findById(99L)).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> productService.getProductById(99L));
+        ProductDto result = productService.getProductById(99L);
+        assertNotNull(result);
+        assertTrue(result.getName().contains("FakeStore Product"));
+        assertEquals(99L, result.getId());
     }
 
     @Test
